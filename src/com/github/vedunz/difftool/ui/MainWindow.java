@@ -30,9 +30,10 @@ public final class MainWindow extends JFrame {
     private JTextArea firstFileName = new JTextArea(1, 20);
     private JTextArea secondFileName = new JTextArea(1, 20);
 
-    private MainWindowHighlightManager mainWindowHighlightManager = new MainWindowHighlightManager(this);
+    private HighlightManager mainWindowHighlightManager = new HighlightManager(firstEditor, secondEditor);
     private ScrollManager scrollManager = new ScrollManager(firstEditor, secondEditor, firstScrollPane, secondScrollPane);
-    private DiffController controller = new DiffController(mainWindowHighlightManager, scrollManager);
+    private VersionManager versionManager = new VersionManager();
+    private DiffController controller = new DiffController(mainWindowHighlightManager, scrollManager, versionManager);
     private final DocumentListener documentListener;
 
     public JTextPane getFirstEditor() {
@@ -97,7 +98,8 @@ public final class MainWindow extends JFrame {
         documentListener = new DocumentListener() {
 
             private void processUpdate(DocumentEvent e) {
-                mainWindowHighlightManager.textUpdated();
+                versionManager.textUpdated();
+                scrollManager.updateDiffResult(null);
                 if (e.getDocument() == firstEditor.getDocument()) {
                     List<String> lines = Arrays.asList(firstEditor.getText().split("\\r?\\n"));
                     controller.uploadFirstText(lines);

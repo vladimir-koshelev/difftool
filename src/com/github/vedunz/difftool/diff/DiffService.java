@@ -15,6 +15,6 @@ public interface DiffService {
     DiffResult calculateDiff();
 
     static DiffService createDefaultDiffService() {
-        return new NaiveDiffService();
+        return new MyersDiffService();
     }
 }

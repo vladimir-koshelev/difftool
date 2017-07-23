@@ -1,9 +1,6 @@
 package com.github.vedunz.difftool.diff.tests;
 
-import com.github.vedunz.difftool.diff.DiffInterval;
-import com.github.vedunz.difftool.diff.DiffResult;
-import com.github.vedunz.difftool.diff.NaiveDiffService;
-import com.github.vedunz.difftool.diff.DiffService;
+import com.github.vedunz.difftool.diff.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -29,7 +26,7 @@ class DiffServiceTest {
     }
 
     @Test
-    void firstTest() {
+    void naiveTest() {
         ArrayList<String> firstText = new ArrayList<>();
         firstText.addAll(PATTERN1);
         firstText.addAll(PATTERN2);
@@ -39,6 +36,27 @@ class DiffServiceTest {
         secondText.addAll(PATTERN1);
         secondText.addAll(PATTERN2);
         DiffService diffService = new NaiveDiffService();
+        diffService.uploadFirstText(firstText);
+        diffService.uploadSecondText(secondText);
+        DiffResult result = diffService.calculateDiff();
+        int totalLength = 0;
+        for (DiffInterval interval: result.getIntervals()) {
+            totalLength += interval.getLength();
+        }
+        assertTrue(totalLength == 6);
+    }
+
+    @Test
+    void myaersTest() {
+        ArrayList<String> firstText = new ArrayList<>();
+        firstText.addAll(PATTERN1);
+        firstText.addAll(PATTERN2);
+        firstText.addAll(PATTERN1);
+        ArrayList<String> secondText = new ArrayList<>();
+        secondText.addAll(PATTERN2);
+        secondText.addAll(PATTERN1);
+        secondText.addAll(PATTERN2);
+        DiffService diffService = new MyersDiffService();
         diffService.uploadFirstText(firstText);
         diffService.uploadSecondText(secondText);
         DiffResult result = diffService.calculateDiff();

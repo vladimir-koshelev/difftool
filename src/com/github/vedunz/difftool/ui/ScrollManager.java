@@ -22,6 +22,7 @@ public class ScrollManager {
     private JScrollPane firstScrollPane;
     private JScrollPane secondScrollPane;
 
+    private DiffResult diffResult;
 
     private static Interval getVisibleLines(JViewport viewport, JTextPane jTextPane) throws BadLocationException {
       Rectangle viewRect = viewport.getViewRect();
@@ -46,8 +47,6 @@ public class ScrollManager {
           viewport.setViewPosition(new Point(0, (int) rectangle.getY()));
       }
     }
-
-    DiffResult diffResult;
 
     private ChangeListener changeListener = new ChangeListener() {
         @Override
