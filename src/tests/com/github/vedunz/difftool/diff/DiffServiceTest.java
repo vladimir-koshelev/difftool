@@ -1,6 +1,5 @@
-package com.github.vedunz.difftool.diff.tests;
+package com.github.vedunz.difftool.diff;
 
-import com.github.vedunz.difftool.diff.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
