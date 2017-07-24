@@ -21,8 +21,19 @@ public final class MainWindow extends JFrame {
     private JTextPane firstEditor = new JTextPane(new DefaultStyledDocument());
     private JTextPane secondEditor = new JTextPane(new DefaultStyledDocument());
 
-    private JScrollPane firstScrollPane = new JScrollPane(firstEditor);
-    private JScrollPane secondScrollPane = new JScrollPane(secondEditor);
+    private JPanel firstPanel = new JPanel(new BorderLayout());
+    private JPanel secondPanel = new JPanel(new BorderLayout());
+    {
+        firstPanel.add(firstEditor, BorderLayout.CENTER);
+        secondPanel.add(secondEditor, BorderLayout.CENTER);
+    }
+
+    private JScrollPane firstScrollPane = new JScrollPane(firstPanel);
+    private JScrollPane secondScrollPane = new JScrollPane(secondPanel);
+    {
+        firstScrollPane.getVerticalScrollBar().setUnitIncrement(32);
+        secondScrollPane.getVerticalScrollBar().setUnitIncrement(32);
+    }
 
     private JButton firstOpenButton = new JButton("Open first file");
     private JButton secondOpenButton = new JButton("Open second file");
@@ -34,15 +45,38 @@ public final class MainWindow extends JFrame {
     private ScrollManager scrollManager = new ScrollManager(firstEditor, secondEditor, firstScrollPane, secondScrollPane);
     private VersionManager versionManager = new VersionManager();
     private DiffController controller = new DiffController(mainWindowHighlightManager, scrollManager, versionManager);
-    private final DocumentListener documentListener;
+    private final DocumentListener documentListener = new DocumentListener() {
 
-    public JTextPane getFirstEditor() {
-        return firstEditor;
-    }
+        private void processUpdate(DocumentEvent e) {
+            versionManager.textUpdated();
+            scrollManager.updateDiffResult(null);
+            if (e.getDocument() == firstEditor.getDocument()) {
+                List<String> lines = Arrays.asList(firstEditor.getText().split("\\r?\\n"));
+                controller.uploadFirstText(lines);
+            } else {
+                List<String> lines = Arrays.asList(secondEditor.getText().split("\\r?\\n"));
+                controller.uploadSecondText(lines);
+            }
+            controller.getDiff();
+        }
 
-    public JTextPane getSecondEditor() {
-        return secondEditor;
-    }
+
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            processUpdate(e);
+        }
+
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            processUpdate(e);
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+
+        }
+    };
 
     private static String readAllLines(BufferedReader buffIn) throws IOException {
         StringBuilder allLines = new StringBuilder();
@@ -94,39 +128,6 @@ public final class MainWindow extends JFrame {
 
         createFilePanel(firstOpenButton, firstFileName, this, firstScrollPane, 0);
         createFilePanel(secondOpenButton, secondFileName, this, secondScrollPane, 2);
-
-        documentListener = new DocumentListener() {
-
-            private void processUpdate(DocumentEvent e) {
-                versionManager.textUpdated();
-                scrollManager.updateDiffResult(null);
-                if (e.getDocument() == firstEditor.getDocument()) {
-                    List<String> lines = Arrays.asList(firstEditor.getText().split("\\r?\\n"));
-                    controller.uploadFirstText(lines);
-                } else {
-                    List<String> lines = Arrays.asList(secondEditor.getText().split("\\r?\\n"));
-                    controller.uploadSecondText(lines);
-                }
-                controller.getDiff();
-            }
-
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                processUpdate(e);
-            }
-
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                processUpdate(e);
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-
-            }
-        };
 
         firstEditor.getStyledDocument().addDocumentListener(documentListener);
         secondEditor.getStyledDocument().addDocumentListener(documentListener);

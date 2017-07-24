@@ -56,8 +56,13 @@ public class ScrollManager {
             try {
                 if (firstScrollPane.getViewport() == e.getSource()) {
                     Interval lines = getVisibleLines(firstScrollPane.getViewport(), firstEditor);
+                    if (isLineNearTheEnd(lines.getEnd(), firstEditor))
+                        return;
+
                     DiffInterval diffInterval = diffResult.getIntervalAfter(lines.getStart(), true);
                     if (diffInterval == null)
+                        return;
+                    if (lines.isLineAfter(diffInterval.getBeginFirst()))
                         return;
                     int delta = lines.getStart() - diffInterval.getBeginFirst();
                     int firstVisibleLineInSecondDiffInterval = diffInterval.getBeginSecond() + delta;
@@ -66,8 +71,13 @@ public class ScrollManager {
                     showLine(firstScrollPane.getViewport(), firstEditor, lines.getStart());
                 } else {
                     Interval lines = getVisibleLines(secondScrollPane.getViewport(), secondEditor);
+                    if (isLineNearTheEnd(lines.getEnd(), secondEditor))
+                        return;
+
                     DiffInterval diffInterval = diffResult.getIntervalAfter(lines.getStart(), false);
                     if (diffInterval == null)
+                        return;
+                    if (lines.isLineAfter(diffInterval.getBeginSecond()))
                         return;
                     int delta = lines.getStart() - diffInterval.getBeginSecond();
                     int firstVisibleLineInFirstDiffInterval = diffInterval.getBeginFirst() + delta;
@@ -79,6 +89,11 @@ public class ScrollManager {
             }
         }
     };
+
+    private boolean isLineNearTheEnd(int line, JTextPane editor) {
+        Element element = editor.getDocument().getDefaultRootElement();
+        return element.getElementCount() - line < 3;
+    }
 
     public void updateDiffResult(DiffResult diffResult) {
         this.diffResult = diffResult;
