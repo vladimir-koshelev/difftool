@@ -49,4 +49,9 @@ public final class Interval {
 
     private int start;
     private int end;
+
+    @Override
+    public String toString() {
+        return String.format("(%d, %d)", start, end);
+    }
 }

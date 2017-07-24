@@ -1,11 +1,9 @@
 package com.github.vedunz.difftool.control;
 
 
-import com.github.vedunz.difftool.ui.HighlightManager;
-import com.github.vedunz.difftool.ui.ScrollManager;
+import com.github.vedunz.difftool.ui.*;
 import com.github.vedunz.difftool.diff.DiffResult;
 import com.github.vedunz.difftool.diff.DiffService;
-import com.github.vedunz.difftool.ui.VersionManager;
 
 import javax.swing.*;
 import java.util.Collection;
@@ -17,16 +15,14 @@ import java.util.concurrent.Executors;
  */
 public class DiffController {
 
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
-    private DiffService diffService = DiffService.createDefaultDiffService();
-    private HighlightManager highlightManager;
-    private ScrollManager scrollManager;
-    private VersionManager versionManager;
+    private final DiffConsumerList diffConsumerList;
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final DiffService diffService = DiffService.createDefaultDiffService();
+    private final VersionManager versionManager;
 
 
-    public DiffController(HighlightManager highlightManager, ScrollManager scrollManager, VersionManager versionManager) {
-        this.highlightManager = highlightManager;
-        this.scrollManager = scrollManager;
+    public DiffController(VersionManager versionManager, DiffConsumerList diffConsumerList) {
+        this.diffConsumerList = diffConsumerList;
         this.versionManager = versionManager;
     }
 
@@ -41,11 +37,10 @@ public class DiffController {
     public void getDiff() {
         long currentVersion = versionManager.getVersion();
         executorService.submit(() -> {
-            DiffResult intervals = diffService.calculateDiff();
+            DiffResult results = diffService.calculateDiff();
             SwingUtilities.invokeLater(() -> {
                 if (currentVersion == versionManager.getVersion()) {
-                    scrollManager.updateDiffResult(intervals);
-                    highlightManager.updateHighlight(intervals);
+                    diffConsumerList.update(results);
                 }
             });
         });

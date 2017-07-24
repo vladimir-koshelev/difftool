@@ -3,18 +3,18 @@ package com.github.vedunz.difftool.ui;
 import com.github.vedunz.difftool.diff.DiffInterval;
 import com.github.vedunz.difftool.diff.DiffResult;
 import com.github.vedunz.difftool.diff.Interval;
+import com.github.vedunz.difftool.ui.util.UIUtils;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
-import java.awt.*;
 
 /**
  * Created by vedun on 23.07.2017.
  */
-public class ScrollManager {
+public class ScrollManager implements DiffConsumer {
 
     private JTextPane firstEditor;
     private JTextPane secondEditor;
@@ -24,30 +24,6 @@ public class ScrollManager {
 
     private DiffResult diffResult;
 
-    private static Interval getVisibleLines(JViewport viewport, JTextPane jTextPane) throws BadLocationException {
-      Rectangle viewRect = viewport.getViewRect();
-
-      Point p = viewRect.getLocation();
-      int startIndex = jTextPane.viewToModel(p);
-
-      p.x += viewRect.width;
-      p.y += viewRect.height;
-      int endIndex = jTextPane.viewToModel(p);
-
-      Element element = jTextPane.getDocument().getDefaultRootElement();
-
-      return new Interval(element.getElementIndex(startIndex), element.getElementIndex(endIndex));
-    }
-
-    private static void showLine(JViewport viewport, JTextPane jTextPane, int line) throws BadLocationException {
-      Element element = jTextPane.getDocument().getDefaultRootElement();
-      int startOffset = element.getElement(line).getStartOffset();
-      Rectangle rectangle = jTextPane.modelToView(startOffset);
-      if (viewport.getViewPosition().getY() != (int) rectangle.getY()) {
-          viewport.setViewPosition(new Point(0, (int) rectangle.getY()));
-      }
-    }
-
     private ChangeListener changeListener = new ChangeListener() {
         @Override
         public void stateChanged(ChangeEvent e) {
@@ -55,7 +31,7 @@ public class ScrollManager {
                 return;
             try {
                 if (firstScrollPane.getViewport() == e.getSource()) {
-                    Interval lines = getVisibleLines(firstScrollPane.getViewport(), firstEditor);
+                    Interval lines = UIUtils.getVisibleLines(firstScrollPane.getViewport(), firstEditor);
                     if (isLineNearTheEnd(lines.getEnd(), firstEditor))
                         return;
 
@@ -67,10 +43,10 @@ public class ScrollManager {
                     int delta = lines.getStart() - diffInterval.getBeginFirst();
                     int firstVisibleLineInSecondDiffInterval = diffInterval.getBeginSecond() + delta;
 
-                    showLine(secondScrollPane.getViewport(), secondEditor, firstVisibleLineInSecondDiffInterval);
-                    showLine(firstScrollPane.getViewport(), firstEditor, lines.getStart());
+                    UIUtils.showLine(secondScrollPane.getViewport(), secondEditor, firstVisibleLineInSecondDiffInterval);
+                    UIUtils.showLine(firstScrollPane.getViewport(), firstEditor, lines.getStart());
                 } else {
-                    Interval lines = getVisibleLines(secondScrollPane.getViewport(), secondEditor);
+                    Interval lines = UIUtils.getVisibleLines(secondScrollPane.getViewport(), secondEditor);
                     if (isLineNearTheEnd(lines.getEnd(), secondEditor))
                         return;
 
@@ -81,8 +57,8 @@ public class ScrollManager {
                         return;
                     int delta = lines.getStart() - diffInterval.getBeginSecond();
                     int firstVisibleLineInFirstDiffInterval = diffInterval.getBeginFirst() + delta;
-                    showLine(firstScrollPane.getViewport(), firstEditor, firstVisibleLineInFirstDiffInterval);
-                    showLine(secondScrollPane.getViewport(), secondEditor, lines.getStart());
+                    UIUtils.showLine(firstScrollPane.getViewport(), firstEditor, firstVisibleLineInFirstDiffInterval);
+                    UIUtils.showLine(secondScrollPane.getViewport(), secondEditor, lines.getStart());
                 }
             } catch (BadLocationException e1) {
                   e1.printStackTrace();
@@ -95,10 +71,6 @@ public class ScrollManager {
         return element.getElementCount() - line < 3;
     }
 
-    public void updateDiffResult(DiffResult diffResult) {
-        this.diffResult = diffResult;
-    }
-
     public ScrollManager(JTextPane firstEditor, JTextPane secondEditor, JScrollPane firstScrollPane, JScrollPane secondScrollPane) {
         this.firstEditor = firstEditor;
         this.secondEditor = secondEditor;
@@ -107,4 +79,10 @@ public class ScrollManager {
         firstScrollPane.getViewport().addChangeListener(changeListener);
         secondScrollPane.getViewport().addChangeListener(changeListener);
     }
+
+    @Override
+    public void updateDiffResult(DiffResult diffResult) {
+        this.diffResult = diffResult;
+    }
+
 }

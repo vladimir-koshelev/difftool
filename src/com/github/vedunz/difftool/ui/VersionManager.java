@@ -1,18 +1,29 @@
 package com.github.vedunz.difftool.ui;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * Created by vedun on 24.07.2017.
  */
 public class VersionManager {
 
-    private long version = 0;
+    Lock lock = new ReentrantLock();
 
-    public void textUpdated() {
+    private volatile long version = 0;
+
+    public void textUpdated()
+    {
+        lock.lock();
         version++;
+        lock.unlock();
     }
 
     public long getVersion() {
-        return version;
+        lock.lock();
+        long value = version;
+        lock.unlock();
+        return value;
     }
 
 }

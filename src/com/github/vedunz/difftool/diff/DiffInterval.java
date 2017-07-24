@@ -38,4 +38,8 @@ public abstract class DiffInterval {
         return String.format("[(%d, %d)<=>(%d, %d)]",
                 beginFirst, beginFirst + length - 1, beginSecond, beginSecond + length -1);
     }
+
+    public Interval getInterval(boolean isFirst) {
+        return isFirst ? getFirstInterval() : getSecondInterval();
+    }
 }

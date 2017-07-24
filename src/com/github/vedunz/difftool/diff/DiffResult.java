@@ -78,4 +78,8 @@ public class DiffResult {
     public int getSecondLineNo() {
         return secondLineNo;
     }
+
+    public int getLineNo(boolean isFirst) {
+        return  isFirst ? getFirstLineNo() : getSecondLineNo();
+    }
 }

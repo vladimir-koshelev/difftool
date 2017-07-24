@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Created by vedun on 22.07.2017.
  */
-public class HighlightManager {
+public class HighlightManager implements DiffConsumer {
 
     public static final String MAIN_STYLE_NAME = "MainStyle";
     public static final String SAME_STYLE_NAME = "SameStyle1";
@@ -103,5 +103,11 @@ public class HighlightManager {
         int start = rootElement.getElement(interval.getStart()).getStartOffset();
         int end = rootElement.getElement(interval.getEnd()).getEndOffset();
         changeStyleInRange(editor, start, end, styleContext.getStyle(isOdd ? SAME_STYLE_NAME : SAME_STYLE_NAME_2));
+    }
+
+    @Override
+    public void updateDiffResult(DiffResult diffResult) {
+        if (diffResult != null)
+            updateHighlightImpl(diffResult);
     }
 }

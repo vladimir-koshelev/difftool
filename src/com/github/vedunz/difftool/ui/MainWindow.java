@@ -1,7 +1,9 @@
 package com.github.vedunz.difftool.ui;
 
 import com.github.vedunz.difftool.control.DiffController;
+import com.github.vedunz.difftool.ui.util.DiffNavigationManager;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -35,8 +37,49 @@ public final class MainWindow extends JFrame {
         secondScrollPane.getVerticalScrollBar().setUnitIncrement(32);
     }
 
-    private JButton firstOpenButton = new JButton("Open first file");
-    private JButton secondOpenButton = new JButton("Open second file");
+    private JButton firstOpenButton = new JButton();
+    private JButton secondOpenButton = new JButton();
+    {
+        try {
+            Image img = ImageIO.read(Thread.currentThread().getContextClassLoader().getResource("images/document-open.png"));
+            firstOpenButton.setToolTipText("Open first file");
+            firstOpenButton.setIcon(new ImageIcon(img));
+            secondOpenButton.setToolTipText("Open second file");
+            secondOpenButton.setIcon(new ImageIcon(img));
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
+    }
+
+    private JButton firstNextDiffButton = new JButton();
+    private JButton secondNextDiffButton = new JButton();
+
+    {
+        try {
+            Image img = ImageIO.read(Thread.currentThread().getContextClassLoader().getResource("images/go-next.png"));
+            firstNextDiffButton.setToolTipText("Next diff");
+            firstNextDiffButton.setIcon(new ImageIcon(img));
+            secondNextDiffButton.setToolTipText("Next diff");
+            secondNextDiffButton.setIcon(new ImageIcon(img));
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
+    }
+
+    private JButton firstPrevDiffButton = new JButton();
+    private JButton secondPrevDiffButton = new JButton();
+
+    {
+        try {
+            Image img = ImageIO.read(Thread.currentThread().getContextClassLoader().getResource("images/go-previous.png"));
+            firstPrevDiffButton.setIcon(new ImageIcon(img));
+            firstPrevDiffButton.setToolTipText("Previous diff");
+            secondPrevDiffButton.setIcon(new ImageIcon(img));
+            secondPrevDiffButton.setToolTipText("Previous diff");
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
+    }
 
     private JTextArea firstFileName = new JTextArea(1, 20);
     private JTextArea secondFileName = new JTextArea(1, 20);
@@ -44,12 +87,26 @@ public final class MainWindow extends JFrame {
     private HighlightManager mainWindowHighlightManager = new HighlightManager(firstEditor, secondEditor);
     private ScrollManager scrollManager = new ScrollManager(firstEditor, secondEditor, firstScrollPane, secondScrollPane);
     private VersionManager versionManager = new VersionManager();
-    private DiffController controller = new DiffController(mainWindowHighlightManager, scrollManager, versionManager);
+    private DiffNavigationManager firstDiffNavigationManager = new DiffNavigationManager(firstScrollPane, firstEditor,
+            firstPrevDiffButton, firstNextDiffButton, true);
+
+    private DiffNavigationManager secondDiffNavigationManager = new DiffNavigationManager(secondScrollPane, secondEditor,
+            secondPrevDiffButton, secondNextDiffButton, true);
+
+    private DiffConsumerList diffConsumerList = new DiffConsumerList();
+    {
+        diffConsumerList.add(mainWindowHighlightManager);
+        diffConsumerList.add(scrollManager);
+        diffConsumerList.add(firstDiffNavigationManager);
+        diffConsumerList.add(secondDiffNavigationManager);
+    }
+
+    private DiffController controller = new DiffController(versionManager, diffConsumerList);
     private final DocumentListener documentListener = new DocumentListener() {
 
         private void processUpdate(DocumentEvent e) {
             versionManager.textUpdated();
-            scrollManager.updateDiffResult(null);
+            diffConsumerList.update(null);
             if (e.getDocument() == firstEditor.getDocument()) {
                 List<String> lines = Arrays.asList(firstEditor.getText().split("\\r?\\n"));
                 controller.uploadFirstText(lines);
@@ -126,8 +183,8 @@ public final class MainWindow extends JFrame {
         firstOpenButton.addActionListener(fileOpenActionListener);
         secondOpenButton.addActionListener(fileOpenActionListener);
 
-        createFilePanel(firstOpenButton, firstFileName, this, firstScrollPane, 0);
-        createFilePanel(secondOpenButton, secondFileName, this, secondScrollPane, 2);
+        createFilePanel(firstOpenButton, firstPrevDiffButton, firstNextDiffButton, firstFileName, this, firstScrollPane, 0);
+        createFilePanel(secondOpenButton, secondPrevDiffButton, secondNextDiffButton, secondFileName, this, secondScrollPane, 4);
 
         firstEditor.getStyledDocument().addDocumentListener(documentListener);
         secondEditor.getStyledDocument().addDocumentListener(documentListener);
@@ -136,20 +193,22 @@ public final class MainWindow extends JFrame {
         setVisible(true);
     }
 
-    private static void createFilePanel(JButton button, JTextArea textArea, Container container, JScrollPane scrollPane,
+    private static void createFilePanel(JButton button, JButton prev, JButton next, JTextArea textArea, Container container, JScrollPane scrollPane,
                                         int offset) {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = offset;
         gbc.gridy = 0;
         gbc.weightx = 0;
         gbc.weighty = 0;
-        gbc.ipadx = 10;
-        gbc.ipady = 10;
         gbc.fill = GridBagConstraints.NONE;
 
         container.add(button, gbc);
+        gbc.gridx++;
+        container.add(prev, gbc);
+        gbc.gridx++;
+        container.add(next, gbc);
 
-        gbc.gridx = offset + 1;
+        gbc.gridx++;
         gbc.weightx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
@@ -158,7 +217,7 @@ public final class MainWindow extends JFrame {
         gbc.gridy = 1;
         gbc.gridx = offset;
         gbc.weighty = 1;
-        gbc.gridwidth = 2;
+        gbc.gridwidth = 4;
         gbc.fill = GridBagConstraints.BOTH;
 
         container.add(scrollPane, gbc);
