@@ -1,9 +1,10 @@
-package com.github.vedunz.difftool.ui.util;
+package com.github.vedunz.difftool.ui;
 
 import com.github.vedunz.difftool.diff.DiffInterval;
 import com.github.vedunz.difftool.diff.DiffResult;
 import com.github.vedunz.difftool.diff.Interval;
 import com.github.vedunz.difftool.ui.DiffConsumer;
+import com.github.vedunz.difftool.ui.util.UIUtils;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -17,15 +18,11 @@ public class DiffNavigationManager implements DiffConsumer {
     private DiffResult diffResult;
     private JScrollPane scrollPane;
     private JTextPane textPane;
-    private JButton prevButton;
-    private JButton nextButton;
     private boolean isFirst;
 
     public DiffNavigationManager(JScrollPane scrollPane, JTextPane textPane, JButton prevButton, JButton nextButton, boolean isFirst) {
         this.scrollPane = scrollPane;
         this.textPane = textPane;
-        this.prevButton = prevButton;
-        this.nextButton = nextButton;
         this.isFirst = isFirst;
 
         prevButton.addActionListener((ActionEvent e) -> {
@@ -56,6 +53,23 @@ public class DiffNavigationManager implements DiffConsumer {
                 end = diffInterval.getInterval(isFirst).getEnd();
             }
             int targetLine = end + 1;
+
+            if (targetLine >= diffResult.getLineNo(isFirst))
+                return;
+
+            do {
+                DiffInterval nextDiff = diffResult.getIntervalAfter(targetLine, isFirst);
+                if (nextDiff == null)
+                    return;
+                Interval interval = nextDiff.getInterval(isFirst);
+                if (interval.isLineBefore(targetLine))
+                    break;
+                targetLine = interval.getEnd() + 1;
+                if (targetLine >= diffResult.getLineNo(isFirst))
+                    return;
+            } while (true);
+
+
             if (targetLine < diffResult.getLineNo(isFirst))
                 UIUtils.showLine(scrollPane.getViewport(), textPane, targetLine - 1);
         } catch (BadLocationException e) {
@@ -74,14 +88,31 @@ public class DiffNavigationManager implements DiffConsumer {
             if (start < 0)
                 return;
 
-            diffInterval = diffResult.getIntervalBefore(start, isFirst);
+            DiffInterval diffIntervalBefore = diffResult.getIntervalBefore(start, isFirst);
 
             int line;
 
-            if (diffInterval == null) {
+            if (diffIntervalBefore == null) {
                 line = 0;
             } else {
-                line = diffInterval.getInterval(isFirst).getEnd();
+                Interval interval = diffIntervalBefore.getInterval(isFirst);
+                line = interval.getEnd();
+                while (interval.getEnd() == start) {
+                    start = interval.getStart() - 1;
+                    if (start < 0)
+                        return;
+                    diffIntervalBefore = diffResult.getIntervalBefore(start, isFirst);
+                    if (diffIntervalBefore == null) {
+                        if (start == 0)
+                            return;
+                        else {
+                            line = 0;
+                            break;
+                        }
+                    }
+                    interval = diffIntervalBefore.getInterval(isFirst);
+                    line = interval.getEnd();
+                }
             }
             UIUtils.showLine(scrollPane.getViewport(), textPane, line);
         } catch (BadLocationException e) {

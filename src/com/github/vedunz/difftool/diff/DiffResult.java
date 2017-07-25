@@ -46,7 +46,7 @@ public class DiffResult {
         Interval interval =  (isFirst) ? intervals.get(idx).getFirstInterval() : intervals.get(idx).getSecondInterval();
         if (interval.isLineInside(line) || interval.isLineAfter(line))
             return intervals.get(idx);
-        if (interval.isLineBefore(idx) && idx > 0)
+        if (idx > 0)
             return intervals.get(idx - 1);
 
         return null;
@@ -60,7 +60,7 @@ public class DiffResult {
         Interval interval =  (isFirst) ? intervals.get(idx).getFirstInterval() : intervals.get(idx).getSecondInterval();
         if (interval.isLineInside(line) || interval.isLineBefore(line))
             return intervals.get(idx);
-        if (interval.isLineBefore(idx) && idx < intervals.size() - 1)
+        if (idx < intervals.size() - 1)
             return intervals.get(idx + 1);
 
         return null;

@@ -1,7 +1,6 @@
 package com.github.vedunz.difftool.ui;
 
 import com.github.vedunz.difftool.control.DiffController;
-import com.github.vedunz.difftool.ui.util.DiffNavigationManager;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -91,7 +90,7 @@ public final class MainWindow extends JFrame {
             firstPrevDiffButton, firstNextDiffButton, true);
 
     private DiffNavigationManager secondDiffNavigationManager = new DiffNavigationManager(secondScrollPane, secondEditor,
-            secondPrevDiffButton, secondNextDiffButton, true);
+            secondPrevDiffButton, secondNextDiffButton, false);
 
     private DiffConsumerList diffConsumerList = new DiffConsumerList();
     {
