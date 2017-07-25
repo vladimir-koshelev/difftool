@@ -6,7 +6,10 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.DefaultStyledDocument;
+import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -80,6 +83,71 @@ public final class MainWindow extends JFrame {
         }
     }
 
+    public class IgnoreChangeUndoManager extends UndoManager  {
+        @Override
+        public void undoableEditHappened(UndoableEditEvent e) {
+            AbstractDocument.DefaultDocumentEvent event =
+                    (AbstractDocument.DefaultDocumentEvent)e.getEdit();
+
+            if  (event.getType().equals(DocumentEvent.EventType.CHANGE))
+                return;
+            else
+                super.undoableEditHappened(e);
+        }
+    };
+
+    private UndoManager firstUndoManager = new IgnoreChangeUndoManager();
+    private UndoManager secondUndoManager = new IgnoreChangeUndoManager();
+
+    {
+        firstEditor.getDocument().addUndoableEditListener(firstUndoManager);
+        secondEditor.getDocument().addUndoableEditListener(secondUndoManager);
+
+        Action firstUndoAnction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (firstUndoManager.canUndo())
+                    firstUndoManager.undo();
+            }
+        };
+        Action secondUndoAnction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (secondUndoManager.canUndo())
+                    secondUndoManager.undo();
+            }
+        };
+        Action firstRedoAnction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (firstUndoManager.canRedo())
+                    firstUndoManager.redo();
+            }
+        };
+        Action secondRedoAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (secondUndoManager.canRedo())
+                    firstUndoManager.redo();
+            }
+        };
+
+        String keyStrokeAndKeyUndo = "control Z";
+        String keyStrokeAndKeyRedo = "control Y";
+        KeyStroke keyStrokeUndo = KeyStroke.getKeyStroke(keyStrokeAndKeyUndo);
+        firstEditor.getInputMap().put(keyStrokeUndo, keyStrokeAndKeyUndo);
+        firstEditor.getActionMap().put(keyStrokeAndKeyUndo, firstUndoAnction);
+        secondEditor.getInputMap().put(keyStrokeUndo, keyStrokeAndKeyUndo);
+        secondEditor.getActionMap().put(keyStrokeAndKeyUndo, secondUndoAnction);
+
+        KeyStroke keyStrokeRedo = KeyStroke.getKeyStroke(keyStrokeAndKeyRedo);
+        firstEditor.getInputMap().put(keyStrokeRedo, keyStrokeAndKeyRedo);
+        firstEditor.getActionMap().put(keyStrokeAndKeyRedo, firstRedoAnction);
+        secondEditor.getInputMap().put(keyStrokeRedo, keyStrokeAndKeyRedo);
+        secondEditor.getActionMap().put(keyStrokeAndKeyRedo, secondRedoAction);
+    }
+
+
     private JTextArea firstFileName = new JTextArea(1, 20);
     private JTextArea secondFileName = new JTextArea(1, 20);
 
@@ -99,6 +167,8 @@ public final class MainWindow extends JFrame {
         diffConsumerList.add(firstDiffNavigationManager);
         diffConsumerList.add(secondDiffNavigationManager);
     }
+
+
 
     private DiffController controller = new DiffController(versionManager, diffConsumerList);
     private final DocumentListener documentListener = new DocumentListener() {
