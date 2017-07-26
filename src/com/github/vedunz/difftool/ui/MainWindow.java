@@ -1,6 +1,9 @@
 package com.github.vedunz.difftool.ui;
 
+import com.github.vedunz.difftool.control.DiffConsumerList;
 import com.github.vedunz.difftool.control.DiffController;
+import com.github.vedunz.difftool.control.LineDiffConsumerList;
+import com.github.vedunz.difftool.control.LineDiffController;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -49,7 +52,7 @@ public final class MainWindow extends JFrame {
             secondOpenButton.setToolTipText("Open second file");
             secondOpenButton.setIcon(new ImageIcon(img));
         } catch (Exception ex) {
-            System.out.println(ex);
+            ex.printStackTrace();
         }
     }
 
@@ -64,7 +67,7 @@ public final class MainWindow extends JFrame {
             secondNextDiffButton.setToolTipText("Next diff");
             secondNextDiffButton.setIcon(new ImageIcon(img));
         } catch (Exception ex) {
-            System.out.println(ex);
+            ex.printStackTrace();
         }
     }
 
@@ -79,7 +82,7 @@ public final class MainWindow extends JFrame {
             secondPrevDiffButton.setIcon(new ImageIcon(img));
             secondPrevDiffButton.setToolTipText("Previous diff");
         } catch (Exception ex) {
-            System.out.println(ex);
+            ex.printStackTrace();
         }
     }
 
@@ -89,9 +92,7 @@ public final class MainWindow extends JFrame {
             AbstractDocument.DefaultDocumentEvent event =
                     (AbstractDocument.DefaultDocumentEvent)e.getEdit();
 
-            if  (event.getType().equals(DocumentEvent.EventType.CHANGE))
-                return;
-            else
+            if  (!event.getType().equals(DocumentEvent.EventType.CHANGE))
                 super.undoableEditHappened(e);
         }
     };
@@ -150,10 +151,17 @@ public final class MainWindow extends JFrame {
 
     private JTextArea firstFileName = new JTextArea(1, 20);
     private JTextArea secondFileName = new JTextArea(1, 20);
-
-    private HighlightManager mainWindowHighlightManager = new HighlightManager(firstEditor, secondEditor);
-    private ScrollManager scrollManager = new ScrollManager(firstEditor, secondEditor, firstScrollPane, secondScrollPane);
     private VersionManager versionManager = new VersionManager();
+
+    private LineDiffConsumerList lineDiffConsumerList = new LineDiffConsumerList();
+    private LineDiffController lineDiffController = new LineDiffController(versionManager, lineDiffConsumerList);
+    private HighlightManager mainWindowHighlightManager = new HighlightManager(firstEditor, secondEditor,
+            firstScrollPane, secondScrollPane, lineDiffController);
+    {
+        lineDiffConsumerList.add(mainWindowHighlightManager);
+    }
+
+    private ScrollManager scrollManager = new ScrollManager(firstEditor, secondEditor, firstScrollPane, secondScrollPane);
     private DiffNavigationManager firstDiffNavigationManager = new DiffNavigationManager(firstScrollPane, firstEditor,
             firstPrevDiffButton, firstNextDiffButton, true);
 
@@ -183,7 +191,7 @@ public final class MainWindow extends JFrame {
                 List<String> lines = Arrays.asList(secondEditor.getText().split("\\r?\\n"));
                 controller.uploadSecondText(lines);
             }
-            controller.getDiff();
+            controller.requestDiff();
         }
 
 

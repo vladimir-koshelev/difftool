@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Created by vedun on 22.07.2017.
  */
-class DiffServiceTest {
+class DiffServiceTests {
 
     private static final ArrayList<String> PATTERN1 = new ArrayList<>();
     private static final ArrayList<String> PATTERN2 = new ArrayList<>();
@@ -37,7 +37,7 @@ class DiffServiceTest {
         DiffService diffService = new NaiveDiffService();
         diffService.uploadFirstText(firstText);
         diffService.uploadSecondText(secondText);
-        DiffResult result = diffService.calculateDiff();
+        DiffResult result = diffService.getDiffResult();
         int totalLength = 0;
         for (DiffInterval interval: result.getIntervals()) {
             totalLength += interval.getLength();
@@ -58,7 +58,7 @@ class DiffServiceTest {
         DiffService diffService = new MyersDiffService();
         diffService.uploadFirstText(firstText);
         diffService.uploadSecondText(secondText);
-        DiffResult result = diffService.calculateDiff();
+        DiffResult result = diffService.getDiffResult();
         int totalLength = 0;
         for (DiffInterval interval: result.getIntervals()) {
             totalLength += interval.getLength();

@@ -31,7 +31,7 @@ public class NaiveDiffService implements DiffService {
     }
 
     @Override
-    public DiffResult calculateDiff() {
+    public DiffResult getDiffResult() {
         int n = firstLines.size();
         int m = secondLines.size();
         int[][] lcs = new int[n + 1][m + 1];

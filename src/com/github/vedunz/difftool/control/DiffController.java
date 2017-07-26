@@ -34,10 +34,10 @@ public class DiffController {
         executorService.submit(() -> diffService.uploadSecondText(text));
     }
 
-    public void getDiff() {
+    public void requestDiff() {
         long currentVersion = versionManager.getVersion();
         executorService.submit(() -> {
-            DiffResult results = diffService.calculateDiff();
+            DiffResult results = diffService.getDiffResult();
             SwingUtilities.invokeLater(() -> {
                 if (currentVersion == versionManager.getVersion()) {
                     diffConsumerList.update(results);

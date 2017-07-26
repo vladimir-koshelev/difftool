@@ -1,4 +1,4 @@
-package com.github.vedunz.difftool.ui;
+package com.github.vedunz.difftool.control;
 
 import com.github.vedunz.difftool.diff.DiffResult;
 

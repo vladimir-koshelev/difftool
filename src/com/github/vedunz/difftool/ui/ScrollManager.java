@@ -1,5 +1,6 @@
 package com.github.vedunz.difftool.ui;
 
+import com.github.vedunz.difftool.control.DiffConsumer;
 import com.github.vedunz.difftool.diff.DiffInterval;
 import com.github.vedunz.difftool.diff.DiffResult;
 import com.github.vedunz.difftool.diff.Interval;

@@ -1,9 +1,9 @@
 package com.github.vedunz.difftool.ui;
 
+import com.github.vedunz.difftool.control.DiffConsumer;
 import com.github.vedunz.difftool.diff.DiffInterval;
 import com.github.vedunz.difftool.diff.DiffResult;
 import com.github.vedunz.difftool.diff.Interval;
-import com.github.vedunz.difftool.ui.DiffConsumer;
 import com.github.vedunz.difftool.ui.util.UIUtils;
 
 import javax.swing.*;
@@ -54,7 +54,7 @@ public class DiffNavigationManager implements DiffConsumer {
             }
             int targetLine = end + 1;
 
-            if (targetLine >= diffResult.getLineNo(isFirst))
+            if (targetLine >= diffResult.getSize(isFirst))
                 return;
 
             do {
@@ -65,12 +65,12 @@ public class DiffNavigationManager implements DiffConsumer {
                 if (interval.isLineBefore(targetLine))
                     break;
                 targetLine = interval.getEnd() + 1;
-                if (targetLine >= diffResult.getLineNo(isFirst))
+                if (targetLine >= diffResult.getSize(isFirst))
                     return;
             } while (true);
 
 
-            if (targetLine < diffResult.getLineNo(isFirst))
+            if (targetLine < diffResult.getSize(isFirst))
                 UIUtils.showLine(scrollPane.getViewport(), textPane, targetLine - 1);
         } catch (BadLocationException e) {
             e.printStackTrace();

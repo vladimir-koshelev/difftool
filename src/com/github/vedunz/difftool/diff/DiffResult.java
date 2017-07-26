@@ -10,25 +10,25 @@ import java.util.List;
 public class DiffResult {
 
     private List<DiffInterval> intervals;
-    private int firstLineNo;
-    private int secondLineNo;
+    private int firstSize;
+    private int secondSize;
 
-    public DiffResult(@NotNull List<DiffInterval> intervals, int firstLineNo, int secondLineNo) {
+    public DiffResult(@NotNull List<DiffInterval> intervals, int firstSize, int secondSize) {
         this.intervals = intervals;
-        this.firstLineNo = firstLineNo;
-        this.secondLineNo = secondLineNo;
+        this.firstSize = firstSize;
+        this.secondSize = secondSize;
     }
 
-    int getIntervalIndexForLine(int line, boolean isFirst) {
+    int getIntervalIndexForLPosition(int position, boolean isFirst) {
         int l = 0;
         int r = intervals.size() - 1;
 
         while (l < r) {
             int m = (l + r) / 2;
-            Interval interval =  (isFirst) ? intervals.get(m).getFirstInterval() : intervals.get(m).getSecondInterval();
-            if (interval.isLineInside(line))
+            Interval interval =  intervals.get(m).getInterval(isFirst);
+            if (interval.isLineInside(position))
                 return m;
-            if (interval.isLineBefore(line))
+            if (interval.isLineBefore(position))
                 r = m - 1;
             else
                 l = m + 1;
@@ -38,13 +38,13 @@ public class DiffResult {
 
     }
 
-    public DiffInterval getIntervalBefore(int line, boolean isFirst) {
+    public DiffInterval getIntervalBefore(int position, boolean isFirst) {
         if (intervals.size() == 0)
             return null;
 
-        int idx = getIntervalIndexForLine(line, isFirst);
+        int idx = getIntervalIndexForLPosition(position, isFirst);
         Interval interval =  (isFirst) ? intervals.get(idx).getFirstInterval() : intervals.get(idx).getSecondInterval();
-        if (interval.isLineInside(line) || interval.isLineAfter(line))
+        if (interval.isLineInside(position) || interval.isLineAfter(position))
             return intervals.get(idx);
         if (idx > 0)
             return intervals.get(idx - 1);
@@ -56,7 +56,7 @@ public class DiffResult {
         if (intervals.size() == 0)
             return null;
 
-        int idx = getIntervalIndexForLine(line, isFirst);
+        int idx = getIntervalIndexForLPosition(line, isFirst);
         Interval interval =  (isFirst) ? intervals.get(idx).getFirstInterval() : intervals.get(idx).getSecondInterval();
         if (interval.isLineInside(line) || interval.isLineBefore(line))
             return intervals.get(idx);
@@ -71,15 +71,15 @@ public class DiffResult {
         return intervals;
     }
 
-    public int getFirstLineNo() {
-        return firstLineNo;
+    public int getFirstSize() {
+        return firstSize;
     }
 
-    public int getSecondLineNo() {
-        return secondLineNo;
+    public int getSecondSize() {
+        return secondSize;
     }
 
-    public int getLineNo(boolean isFirst) {
-        return  isFirst ? getFirstLineNo() : getSecondLineNo();
+    public int getSize(boolean isFirst) {
+        return  isFirst ? getFirstSize() : getSecondSize();
     }
 }

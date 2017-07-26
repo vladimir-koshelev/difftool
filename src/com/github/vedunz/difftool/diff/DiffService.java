@@ -12,7 +12,7 @@ public interface DiffService {
 
     void uploadSecondText(@NotNull Collection<String> lines);
 
-    DiffResult calculateDiff();
+    DiffResult getDiffResult();
 
     static DiffService createDefaultDiffService() {
         return new MyersDiffService();
