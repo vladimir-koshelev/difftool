@@ -22,9 +22,9 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
 
     public static final String MAIN_STYLE_NAME = "MainStyle";
     public static final String SAME_STYLE_NAME = "SameStyle1";
-    public static final String SAME_STYLE_NAME_2 = "SameStyle2";
-    public static final String SAME_IN_LINE_STYLE_NAME = "SameInLine";
+    public static final String SAME_STYLE_NAME_BOLD = "SameStyle2";
     public static final String DIFF_STYLE_NAME = "DiffStyle";
+    public static final String DIFF_STYLE_NAME_BOLD = "DiffStyle2";
 
     private JTextPane firstEditor;
     private JTextPane secondEditor;
@@ -98,21 +98,20 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
         StyleConstants.setBackground(sameStyle, new Color(0xD0,0xFF,0xD0));
         StyleConstants.setFontSize(sameStyle, 12);
 
-        Style sameStyle2 = styleContext.addStyle(SAME_STYLE_NAME_2, defaultStyle);
+        Style sameStyle2 = styleContext.addStyle(SAME_STYLE_NAME_BOLD, defaultStyle);
         StyleConstants.setFontFamily(sameStyle2, "Monospaced");
-        StyleConstants.setBackground(sameStyle2, new Color(0xA0,0xFF,0xA0));
+        StyleConstants.setBackground(sameStyle2, new Color(0x90,0xFF,0xA0));
         StyleConstants.setFontSize(sameStyle2, 12);
-
-        Style sameStyle3 = styleContext.addStyle(SAME_IN_LINE_STYLE_NAME, defaultStyle);
-        StyleConstants.setFontFamily(sameStyle3, "Monospaced");
-        StyleConstants.setBackground(sameStyle3, new Color(0xC0,0xE0,0xC0));
-        StyleConstants.setFontSize(sameStyle3, 12);
-
 
         Style diffStyle = styleContext.addStyle(DIFF_STYLE_NAME, defaultStyle);
         StyleConstants.setFontFamily(diffStyle, "Monospaced");
         StyleConstants.setBackground(diffStyle, new Color(0xFF, 0xD0, 0xD0));
         StyleConstants.setFontSize(diffStyle, 12);
+
+        Style diffStyle2 = styleContext.addStyle(DIFF_STYLE_NAME_BOLD, defaultStyle);
+        StyleConstants.setFontFamily(diffStyle2, "Monospaced");
+        StyleConstants.setBackground(diffStyle2, new Color(0xFF, 0xA0, 0x90));
+        StyleConstants.setFontSize(diffStyle2, 12);
     }
 
     public HighlightManager(JTextPane firstEditor, JTextPane secondEditor,
@@ -148,8 +147,8 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
             Interval firstInterval = diffInterval.getFirstInterval();
             Interval secondInterval = diffInterval.getSecondInterval();
 
-            changeStyleForInterval(firstRootElement, firstInterval, firstCurLine, firstEditor, isOdd);
-            changeStyleForInterval(secondRootElement, secondInterval, secondCurLine, secondEditor, isOdd);
+            changeStyleForInterval(firstRootElement, firstInterval, firstCurLine, firstEditor, true);
+            changeStyleForInterval(secondRootElement, secondInterval, secondCurLine, secondEditor, false);
 
             firstCurLine = firstInterval.getEnd() + 1;
             secondCurLine =  secondInterval.getEnd() + 1;
@@ -161,20 +160,20 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
         }
         if (secondCurLine < secondLineNo) {
             changeStyleInRange(secondEditor, secondRootElement.getElement(secondCurLine).getStartOffset(),
-                    secondRootElement.getElement(secondLineNo - 1).getEndOffset(), styleContext.getStyle(DIFF_STYLE_NAME));
+                    secondRootElement.getElement(secondLineNo - 1).getEndOffset(), styleContext.getStyle(SAME_STYLE_NAME));
         }
     }
 
-    private void changeStyleForInterval(Element rootElement, Interval interval, int curPos, JTextPane editor, boolean isOdd) {
+    private void changeStyleForInterval(Element rootElement, Interval interval, int curPos, JTextPane editor, boolean isFirst) {
         if (curPos < interval.getStart()) {
             int start = rootElement.getElement(curPos).getStartOffset();
             int end = rootElement.getElement(interval.getStart() - 1).getEndOffset();
-            changeStyleInRange(editor, start, end, styleContext.getStyle(DIFF_STYLE_NAME));
+            changeStyleInRange(editor, start, end, styleContext.getStyle(isFirst ? DIFF_STYLE_NAME : SAME_STYLE_NAME));
         }
 
         int start = rootElement.getElement(interval.getStart()).getStartOffset();
         int end = rootElement.getElement(interval.getEnd()).getEndOffset();
-        changeStyleInRange(editor, start, end, styleContext.getStyle(isOdd ? SAME_STYLE_NAME : SAME_STYLE_NAME_2));
+        changeStyleInRange(editor, start, end, styleContext.getStyle(MAIN_STYLE_NAME));
     }
 
     @Override
@@ -237,30 +236,31 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
             Interval firstInterval = diffInterval.getFirstInterval();
             Interval secondInterval = diffInterval.getSecondInterval();
 
-            changeStyleForIntervalInLine(firstStartOffset, firstCurrentOffset, firstInterval, firstEditor);
-            changeStyleForIntervalInLine(secondStartOffset, secondCurrentOffset, secondInterval, secondEditor);
+            changeStyleForIntervalInLine(firstStartOffset, firstCurrentOffset, firstInterval, firstEditor, true);
+            changeStyleForIntervalInLine(secondStartOffset, secondCurrentOffset, secondInterval, secondEditor, false);
 
             firstCurrentOffset = firstStartOffset + firstInterval.getEnd() + 1;
             secondCurrentOffset = secondStartOffset + secondInterval.getEnd() + 1;
         }
         if (firstStartOffset <= firstEndOffset)
             changeStyleInRange(firstEditor, firstCurrentOffset, firstEndOffset,
-                    styleContext.getStyle(DIFF_STYLE_NAME));
+                    styleContext.getStyle(DIFF_STYLE_NAME_BOLD));
 
         if (secondStartOffset <= secondEndOffset)
             changeStyleInRange(secondEditor, secondCurrentOffset, secondEndOffset,
-                    styleContext.getStyle(DIFF_STYLE_NAME));
+                    styleContext.getStyle(SAME_STYLE_NAME_BOLD));
     }
 
-    private void changeStyleForIntervalInLine(int startOffset, int currentOffset, Interval interval, JTextPane editor) {
+    private void changeStyleForIntervalInLine(int startOffset, int currentOffset, Interval interval, JTextPane editor,
+                                              boolean isFirst) {
         int start = startOffset + interval.getStart();
         int end = startOffset + interval.getEnd();
         if (currentOffset < start) {
             changeStyleInRange(editor, currentOffset, start - 1,
-                    styleContext.getStyle(DIFF_STYLE_NAME));
+                    styleContext.getStyle(isFirst ? DIFF_STYLE_NAME_BOLD: SAME_STYLE_NAME_BOLD));
         }
         changeStyleInRange(editor, start, end,
-                styleContext.getStyle(SAME_IN_LINE_STYLE_NAME));
+                styleContext.getStyle(isFirst ? DIFF_STYLE_NAME : SAME_STYLE_NAME));
 
     }
 }
