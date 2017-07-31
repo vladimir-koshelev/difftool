@@ -8,12 +8,11 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class VersionManager {
 
-    Lock lock = new ReentrantLock();
+    private Lock lock = new ReentrantLock();
 
     private volatile long version = 0;
 
-    public void textUpdated()
-    {
+    public void textUpdated() {
         lock.lock();
         version++;
         lock.unlock();

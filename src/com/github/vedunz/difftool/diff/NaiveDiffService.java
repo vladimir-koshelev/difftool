@@ -2,7 +2,10 @@ package com.github.vedunz.difftool.diff;
 
 import com.sun.istack.internal.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by vedun on 22.07.2017.
@@ -24,18 +27,12 @@ public class NaiveDiffService implements DiffService {
         secondLines.addAll(text);
     }
 
-    enum LCSParent {
-        FIRST,
-        SECOND,
-        BOTH
-    }
-
     @Override
     public DiffResult getDiffResult() {
         int n = firstLines.size();
         int m = secondLines.size();
         int[][] lcs = new int[n + 1][m + 1];
-        LCSParent[][] lcsParent  = new LCSParent[n + 1][m + 1];
+        LCSParent[][] lcsParent = new LCSParent[n + 1][m + 1];
 
         for (int i = 1; i <= n; ++i) {
             for (int j = 1; j <= m; ++j) {
@@ -63,7 +60,8 @@ public class NaiveDiffService implements DiffService {
                     curDiffInterval = new MutableDiffInterval(i - 1, j - 1);
                 else
                     curDiffInterval.expand();
-                i--; j--;
+                i--;
+                j--;
             } else {
                 if (curDiffInterval != null) {
                     curDiffInterval.reverse();
@@ -86,7 +84,7 @@ public class NaiveDiffService implements DiffService {
     }
 
     private static boolean isFirstGreater(int firstLCSLength, int secondLCSLength,
-                                   LCSParent firstLCSParent) {
+                                          LCSParent firstLCSParent) {
         if (firstLCSLength > secondLCSLength)
             return true;
         if (firstLCSLength < secondLCSLength)
@@ -94,5 +92,11 @@ public class NaiveDiffService implements DiffService {
         if (firstLCSParent == LCSParent.BOTH)
             return true;
         return false;
+    }
+
+    enum LCSParent {
+        FIRST,
+        SECOND,
+        BOTH
     }
 }

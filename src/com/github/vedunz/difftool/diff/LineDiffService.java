@@ -5,10 +5,10 @@ package com.github.vedunz.difftool.diff;
  */
 public interface LineDiffService {
 
-    DiffResult getDiffResult(String firstLine, String secondLine);
-
     static LineDiffService createDefaultDiffService() {
         return new MyersLineDiffService();
     }
+
+    DiffResult getDiffResult(String firstLine, String secondLine);
 
 }

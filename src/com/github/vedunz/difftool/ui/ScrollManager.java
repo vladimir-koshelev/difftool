@@ -62,15 +62,10 @@ public class ScrollManager implements DiffConsumer {
                     UIUtils.showLine(secondScrollPane.getViewport(), secondEditor, lines.getStart());
                 }
             } catch (BadLocationException e1) {
-                  e1.printStackTrace();
+                e1.printStackTrace();
             }
         }
     };
-
-    private boolean isLineNearTheEnd(int line, JTextPane editor) {
-        Element element = editor.getDocument().getDefaultRootElement();
-        return element.getElementCount() - line < 3;
-    }
 
     public ScrollManager(JTextPane firstEditor, JTextPane secondEditor, JScrollPane firstScrollPane, JScrollPane secondScrollPane) {
         this.firstEditor = firstEditor;
@@ -84,6 +79,11 @@ public class ScrollManager implements DiffConsumer {
     @Override
     public void updateDiffResult(DiffResult diffResult) {
         this.diffResult = diffResult;
+    }
+
+    private boolean isLineNearTheEnd(int line, JTextPane editor) {
+        Element element = editor.getDocument().getDefaultRootElement();
+        return element.getElementCount() - line < 3;
     }
 
 }

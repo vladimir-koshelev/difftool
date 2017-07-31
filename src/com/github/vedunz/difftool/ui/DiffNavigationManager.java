@@ -38,7 +38,12 @@ public class DiffNavigationManager implements DiffConsumer {
         });
     }
 
-    private void gotoNextDiff(){
+    @Override
+    public void updateDiffResult(DiffResult diffResult) {
+        this.diffResult = diffResult;
+    }
+
+    private void gotoNextDiff() {
         try {
             Interval visibleLines = UIUtils.getVisibleLines(scrollPane.getViewport(), textPane);
             DiffInterval diffInterval = diffResult.getIntervalAfter(visibleLines.getStart(), isFirst);
@@ -118,10 +123,5 @@ public class DiffNavigationManager implements DiffConsumer {
         } catch (BadLocationException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void updateDiffResult(DiffResult diffResult) {
-        this.diffResult = diffResult;
     }
 }

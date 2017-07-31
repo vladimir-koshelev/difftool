@@ -19,31 +19,12 @@ public class DiffResult {
         this.secondSize = secondSize;
     }
 
-    int getIntervalIndexForLPosition(int position, boolean isFirst) {
-        int l = 0;
-        int r = intervals.size() - 1;
-
-        while (l < r) {
-            int m = (l + r) / 2;
-            Interval interval =  intervals.get(m).getInterval(isFirst);
-            if (interval.isLineInside(position))
-                return m;
-            if (interval.isLineBefore(position))
-                r = m - 1;
-            else
-                l = m + 1;
-        }
-
-        return (l + r) / 2;
-
-    }
-
     public DiffInterval getIntervalBefore(int position, boolean isFirst) {
         if (intervals.size() == 0)
             return null;
 
         int idx = getIntervalIndexForLPosition(position, isFirst);
-        Interval interval =  (isFirst) ? intervals.get(idx).getFirstInterval() : intervals.get(idx).getSecondInterval();
+        Interval interval = (isFirst) ? intervals.get(idx).getFirstInterval() : intervals.get(idx).getSecondInterval();
         if (interval.isLineInside(position) || interval.isLineAfter(position))
             return intervals.get(idx);
         if (idx > 0)
@@ -57,7 +38,7 @@ public class DiffResult {
             return null;
 
         int idx = getIntervalIndexForLPosition(line, isFirst);
-        Interval interval =  (isFirst) ? intervals.get(idx).getFirstInterval() : intervals.get(idx).getSecondInterval();
+        Interval interval = (isFirst) ? intervals.get(idx).getFirstInterval() : intervals.get(idx).getSecondInterval();
         if (interval.isLineInside(line) || interval.isLineBefore(line))
             return intervals.get(idx);
         if (idx < intervals.size() - 1)
@@ -80,6 +61,25 @@ public class DiffResult {
     }
 
     public int getSize(boolean isFirst) {
-        return  isFirst ? getFirstSize() : getSecondSize();
+        return isFirst ? getFirstSize() : getSecondSize();
+    }
+
+    private int getIntervalIndexForLPosition(int position, boolean isFirst) {
+        int l = 0;
+        int r = intervals.size() - 1;
+
+        while (l < r) {
+            int m = (l + r) / 2;
+            Interval interval = intervals.get(m).getInterval(isFirst);
+            if (interval.isLineInside(position))
+                return m;
+            if (interval.isLineBefore(position))
+                r = m - 1;
+            else
+                l = m + 1;
+        }
+
+        return (l + r) / 2;
+
     }
 }

@@ -1,9 +1,9 @@
 package com.github.vedunz.difftool.control;
 
 
-import com.github.vedunz.difftool.ui.*;
 import com.github.vedunz.difftool.diff.DiffResult;
 import com.github.vedunz.difftool.diff.DiffService;
+import com.github.vedunz.difftool.ui.VersionManager;
 
 import javax.swing.*;
 import java.util.Collection;

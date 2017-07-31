@@ -20,7 +20,7 @@ public class LineDiffConsumerList {
     }
 
     public void update(DiffResult diffResult, int firstLineNo, int secondLineNo) {
-        for (LineDiffConsumer diffConsumer :diffConsumerList) {
+        for (LineDiffConsumer diffConsumer : diffConsumerList) {
             diffConsumer.updateDiffResult(diffResult, firstLineNo, secondLineNo);
         }
     }

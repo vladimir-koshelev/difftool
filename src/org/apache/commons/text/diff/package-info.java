@@ -16,7 +16,7 @@
  */
 /**
  * <p>Provides algorithms for diff between strings.</p>
- *
+ * <p>
  * <p>The initial implementation of the Myers algorithm was adapted from the
  * commons-collections sequence package.</p>
  *

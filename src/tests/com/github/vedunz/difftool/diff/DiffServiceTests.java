@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Created by vedun on 22.07.2017.
@@ -39,7 +39,7 @@ class DiffServiceTests {
         diffService.uploadSecondText(secondText);
         DiffResult result = diffService.getDiffResult();
         int totalLength = 0;
-        for (DiffInterval interval: result.getIntervals()) {
+        for (DiffInterval interval : result.getIntervals()) {
             totalLength += interval.getLength();
         }
         assertTrue(totalLength == 6);
@@ -60,7 +60,7 @@ class DiffServiceTests {
         diffService.uploadSecondText(secondText);
         DiffResult result = diffService.getDiffResult();
         int totalLength = 0;
-        for (DiffInterval interval: result.getIntervals()) {
+        for (DiffInterval interval : result.getIntervals()) {
             totalLength += interval.getLength();
         }
         assertTrue(totalLength == 6);

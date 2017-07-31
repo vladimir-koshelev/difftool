@@ -4,6 +4,9 @@ package com.github.vedunz.difftool.diff;
  * Created by vedun on 22.07.2017.
  */
 public final class Interval {
+    private int start;
+    private int end;
+
     public Interval(int start, int end) {
         this.start = start;
         this.end = end;
@@ -46,9 +49,6 @@ public final class Interval {
     public boolean isLineBefore(int line) {
         return line < start;
     }
-
-    private int start;
-    private int end;
 
     @Override
     public String toString() {

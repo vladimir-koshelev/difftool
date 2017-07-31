@@ -40,31 +40,42 @@ package org.apache.commons.text.diff;
  * be important if subclassing is used for some elements in the first sequence
  * and the <code>equals</code> method is specialized.
  * </p>
- *
+ * <p>
  * <p>
  * This code has been adapted from Apache Commons Collections 4.0.
  * </p>
  *
+ * @param <T> object type
  * @see DiffComparator
  * @see EditScript
- *
- * @param <T> object type
  * @since 1.0
  */
 public abstract class EditCommand<T> {
 
-    /** Object on which the command should be applied. */
+    /**
+     * Object on which the command should be applied.
+     */
     private final T object;
 
     /**
      * Simple constructor. Creates a new instance of EditCommand
      *
-     * @param object  reference to the object associated with this command, this
-     *   refers to an element of one of the sequences being compared
+     * @param object reference to the object associated with this command, this
+     *               refers to an element of one of the sequences being compared
      */
     protected EditCommand(final T object) {
         this.object = object;
     }
+
+    /**
+     * Accept a visitor.
+     * <p>
+     * This method is invoked for each commands belonging to
+     * an {@link EditScript EditScript}, in order to implement the visitor design pattern
+     *
+     * @param visitor the visitor to be accepted
+     */
+    public abstract void accept(CommandVisitor<T> visitor);
 
     /**
      * Returns the object associated with this command.
@@ -74,15 +85,5 @@ public abstract class EditCommand<T> {
     protected T getObject() {
         return object;
     }
-
-    /**
-     * Accept a visitor.
-     * <p>
-     * This method is invoked for each commands belonging to
-     * an {@link EditScript EditScript}, in order to implement the visitor design pattern
-     *
-     * @param visitor  the visitor to be accepted
-     */
-    public abstract void accept(CommandVisitor<T> visitor);
 
 }

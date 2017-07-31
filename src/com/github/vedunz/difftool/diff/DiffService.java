@@ -8,13 +8,13 @@ import java.util.Collection;
  * Created by vedun on 23.07.2017.
  */
 public interface DiffService {
+    static DiffService createDefaultDiffService() {
+        return new MyersDiffService();
+    }
+
     void uploadFirstText(@NotNull Collection<String> lines);
 
     void uploadSecondText(@NotNull Collection<String> lines);
 
     DiffResult getDiffResult();
-
-    static DiffService createDefaultDiffService() {
-        return new MyersDiffService();
-    }
 }

@@ -13,18 +13,18 @@ import java.awt.*;
 public class UIUtils {
 
     public static Interval getVisibleLines(JViewport viewport, JTextPane jTextPane) throws BadLocationException {
-      Rectangle viewRect = viewport.getViewRect();
+        Rectangle viewRect = viewport.getViewRect();
 
-      Point p = viewRect.getLocation();
-      int startIndex = jTextPane.viewToModel(p);
+        Point p = viewRect.getLocation();
+        int startIndex = jTextPane.viewToModel(p);
 
-      p.x += viewRect.width;
-      p.y += viewRect.height;
-      int endIndex = jTextPane.viewToModel(p);
+        p.x += viewRect.width;
+        p.y += viewRect.height;
+        int endIndex = jTextPane.viewToModel(p);
 
-      Element element = jTextPane.getDocument().getDefaultRootElement();
+        Element element = jTextPane.getDocument().getDefaultRootElement();
 
-      return new Interval(element.getElementIndex(startIndex), element.getElementIndex(endIndex));
+        return new Interval(element.getElementIndex(startIndex), element.getElementIndex(endIndex));
     }
 
     public static void showLine(JViewport viewport, JTextPane jTextPane, int line) throws BadLocationException {

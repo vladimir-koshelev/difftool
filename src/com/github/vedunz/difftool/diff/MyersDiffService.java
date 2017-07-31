@@ -1,10 +1,7 @@
 package com.github.vedunz.difftool.diff;
 
-import org.apache.commons.text.diff.*;
-
 import java.util.ArrayList;
 import java.util.Collection;
-
 import java.util.List;
 
 /**

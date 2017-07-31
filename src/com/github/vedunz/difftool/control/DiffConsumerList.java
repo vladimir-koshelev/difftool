@@ -21,7 +21,7 @@ public class DiffConsumerList {
     }
 
     public void update(DiffResult diffResult) {
-        for (DiffConsumer diffConsumer :diffConsumerList) {
+        for (DiffConsumer diffConsumer : diffConsumerList) {
             diffConsumer.updateDiffResult(diffResult);
         }
     }
