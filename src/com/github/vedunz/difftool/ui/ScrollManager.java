@@ -17,17 +17,20 @@ import javax.swing.text.Element;
  */
 public class ScrollManager implements DiffConsumer {
 
-    private JTextPane firstEditor;
-    private JTextPane secondEditor;
+    private final JTextPane firstEditor;
+    private final JTextPane secondEditor;
 
-    private JScrollPane firstScrollPane;
-    private JScrollPane secondScrollPane;
+    private final JScrollPane firstScrollPane;
+    private final JScrollPane secondScrollPane;
 
     private DiffResult diffResult;
 
-    private ChangeListener changeListener = new ChangeListener() {
-        @Override
-        public void stateChanged(ChangeEvent e) {
+    public ScrollManager(DiffPanel firstDiffPanel, DiffPanel secondDiffPanel) {
+        this.firstEditor = firstDiffPanel.getEditor();
+        this.secondEditor = secondDiffPanel.getEditor();
+        this.firstScrollPane = firstDiffPanel.getScrollPane();
+        this.secondScrollPane = secondDiffPanel.getScrollPane();
+        final ChangeListener changeListener = e -> {
             if (diffResult == null)
                 return;
             try {
@@ -64,14 +67,7 @@ public class ScrollManager implements DiffConsumer {
             } catch (BadLocationException e1) {
                 e1.printStackTrace();
             }
-        }
-    };
-
-    public ScrollManager(DiffPanel firstDiffPanel, DiffPanel secondDiffPanel) {
-        this.firstEditor = firstDiffPanel.getEditor();
-        this.secondEditor = secondDiffPanel.getEditor();
-        this.firstScrollPane = firstDiffPanel.getScrollPane();
-        this.secondScrollPane = secondDiffPanel.getScrollPane();
+        };
         firstScrollPane.getViewport().addChangeListener(changeListener);
         secondScrollPane.getViewport().addChangeListener(changeListener);
     }

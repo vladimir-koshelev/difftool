@@ -16,9 +16,9 @@ import java.awt.event.ActionEvent;
 public class DiffNavigationManager implements DiffConsumer {
 
     private DiffResult diffResult;
-    private JScrollPane scrollPane;
-    private JTextPane textPane;
-    private boolean isFirst;
+    private final JScrollPane scrollPane;
+    private final JTextPane textPane;
+    private final boolean isFirst;
 
     public DiffNavigationManager(DiffPanel diffPanel, boolean isFirst) {
         this.scrollPane = diffPanel.getScrollPane();

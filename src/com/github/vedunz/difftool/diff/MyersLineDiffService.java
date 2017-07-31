@@ -7,8 +7,8 @@ import java.util.List;
  * Created by vedun on 26.07.2017.
  */
 public class MyersLineDiffService extends MyersDiffServiceCommon implements LineDiffService {
-    private List<Character> firstChars = new ArrayList<>();
-    private List<Character> secondChars = new ArrayList<>();
+    private final List<Character> firstChars = new ArrayList<>();
+    private final List<Character> secondChars = new ArrayList<>();
 
     @Override
     public DiffResult getDiffResult(String firstLine, String secondLine) {

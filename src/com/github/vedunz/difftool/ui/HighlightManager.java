@@ -27,28 +27,16 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
     public static final String DIFF_STYLE_NAME = "DiffStyle";
     public static final String DIFF_STYLE_NAME_BOLD = "DiffStyle2";
 
-    private JTextPane firstEditor;
-    private JTextPane secondEditor;
-    private JScrollPane firstScrollPane;
-    private JScrollPane secondScrollPane;
+    private final JTextPane firstEditor;
+    private final JTextPane secondEditor;
+    private final JScrollPane firstScrollPane;
+    private final JScrollPane secondScrollPane;
     private StyleContext styleContext;
     private DiffResult diffResult;
-    private LineDiffController lineDiffController;
-    private Map<Integer, Integer> firstLinesForLineDiff = new HashMap<>();
-    private Map<Integer, Integer> secondLinesForLineDiff = new HashMap<>();
-    private ChangeListener changeListener = e -> {
-        try {
-            if (diffResult == null)
-                return;
-            if (e.getSource() == firstScrollPane.getViewport()) {
-                requestLinesInVisibleAreaFirst();
-            } else {
-                requestLinesInVisibleAreaSecond();
-            }
-        } catch (BadLocationException e1) {
-            e1.printStackTrace();
-        }
-    };
+    private final LineDiffController lineDiffController;
+    private final Map<Integer, Integer> firstLinesForLineDiff = new HashMap<>();
+    private final Map<Integer, Integer> secondLinesForLineDiff = new HashMap<>();
+
 
     public HighlightManager(DiffPanel firstDiffPanel, DiffPanel secondDiffPanel,
                             LineDiffController lineDiffController) {
@@ -57,6 +45,19 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
         this.firstScrollPane = firstDiffPanel.getScrollPane();
         this.secondScrollPane = secondDiffPanel.getScrollPane();
         this.lineDiffController = lineDiffController;
+        final ChangeListener changeListener = e -> {
+            try {
+                if (diffResult == null)
+                    return;
+                if (e.getSource() == firstScrollPane.getViewport()) {
+                    requestLinesInVisibleAreaFirst();
+                } else {
+                    requestLinesInVisibleAreaSecond();
+                }
+            } catch (BadLocationException e1) {
+                e1.printStackTrace();
+            }
+        };
         firstScrollPane.getViewport().addChangeListener(changeListener);
         secondScrollPane.getViewport().addChangeListener(changeListener);
         createDocumentStyles();

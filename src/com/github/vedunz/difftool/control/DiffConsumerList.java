@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class DiffConsumerList {
 
-    private List<DiffConsumer> diffConsumerList = new ArrayList<>();
+    private final List<DiffConsumer> diffConsumerList = new ArrayList<>();
 
     public void add(DiffConsumer consumer) {
         diffConsumerList.add(consumer);

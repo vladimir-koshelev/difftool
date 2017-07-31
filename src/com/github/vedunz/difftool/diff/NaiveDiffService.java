@@ -12,8 +12,8 @@ import java.util.List;
  */
 public class NaiveDiffService implements DiffService {
 
-    private ArrayList<String> firstLines = new ArrayList<>();
-    private ArrayList<String> secondLines = new ArrayList<>();
+    private final ArrayList<String> firstLines = new ArrayList<>();
+    private final ArrayList<String> secondLines = new ArrayList<>();
 
     @Override
     public void uploadFirstText(@NotNull Collection<String> text) {
@@ -51,7 +51,7 @@ public class NaiveDiffService implements DiffService {
             }
         }
 
-        List<DiffInterval> diffIntervals = new ArrayList();
+        List<DiffInterval> diffIntervals = new ArrayList<>();
         int i = n, j = m;
         MutableDiffInterval curDiffInterval = null;
         while (i > 0 && j > 0) {
@@ -89,9 +89,7 @@ public class NaiveDiffService implements DiffService {
             return true;
         if (firstLCSLength < secondLCSLength)
             return false;
-        if (firstLCSParent == LCSParent.BOTH)
-            return true;
-        return false;
+        return firstLCSParent == LCSParent.BOTH;
     }
 
     enum LCSParent {

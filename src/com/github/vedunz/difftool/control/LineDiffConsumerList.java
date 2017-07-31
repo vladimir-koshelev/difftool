@@ -9,7 +9,7 @@ import java.util.List;
  * Created by vedun on 26.07.2017.
  */
 public class LineDiffConsumerList {
-    private List<LineDiffConsumer> diffConsumerList = new ArrayList<>();
+    private final List<LineDiffConsumer> diffConsumerList = new ArrayList<>();
 
     public void add(LineDiffConsumer consumer) {
         diffConsumerList.add(consumer);

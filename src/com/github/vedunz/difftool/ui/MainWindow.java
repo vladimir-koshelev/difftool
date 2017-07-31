@@ -31,19 +31,18 @@ public final class MainWindow extends JFrame {
     private final DiffPanel firstDiffPanel = new DiffPanel();
     private final DiffPanel secondDiffPanel = new DiffPanel();
 
-    private VersionManager versionManager = new VersionManager();
-    private LineDiffConsumerList lineDiffConsumerList = new LineDiffConsumerList();
+    private final VersionManager versionManager = new VersionManager();
+    private final LineDiffConsumerList lineDiffConsumerList = new LineDiffConsumerList();
 
-    ;
-    private LineDiffController lineDiffController = new LineDiffController(versionManager, lineDiffConsumerList);
-    private HighlightManager mainWindowHighlightManager = new HighlightManager(firstDiffPanel, secondDiffPanel, lineDiffController);
+    private final LineDiffController lineDiffController = new LineDiffController(versionManager, lineDiffConsumerList);
+    private final HighlightManager mainWindowHighlightManager = new HighlightManager(firstDiffPanel, secondDiffPanel, lineDiffController);
 
-    private ScrollManager scrollManager = new ScrollManager(firstDiffPanel, secondDiffPanel);
+    private final ScrollManager scrollManager = new ScrollManager(firstDiffPanel, secondDiffPanel);
 
-    private DiffNavigationManager firstDiffNavigationManager = new DiffNavigationManager(firstDiffPanel, true);
-    private DiffNavigationManager secondDiffNavigationManager = new DiffNavigationManager(secondDiffPanel, false);
-    private DiffConsumerList diffConsumerList = new DiffConsumerList();
-    private DiffController controller = new DiffController(versionManager, diffConsumerList);
+    private final DiffNavigationManager firstDiffNavigationManager = new DiffNavigationManager(firstDiffPanel, true);
+    private final DiffNavigationManager secondDiffNavigationManager = new DiffNavigationManager(secondDiffPanel, false);
+    private final DiffConsumerList diffConsumerList = new DiffConsumerList();
+    private final DiffController controller = new DiffController(versionManager, diffConsumerList);
 
     private final DocumentListener documentListener = new DocumentListener() {
 
