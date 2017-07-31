@@ -67,11 +67,11 @@ public class ScrollManager implements DiffConsumer {
         }
     };
 
-    public ScrollManager(JTextPane firstEditor, JTextPane secondEditor, JScrollPane firstScrollPane, JScrollPane secondScrollPane) {
-        this.firstEditor = firstEditor;
-        this.secondEditor = secondEditor;
-        this.firstScrollPane = firstScrollPane;
-        this.secondScrollPane = secondScrollPane;
+    public ScrollManager(DiffPanel firstDiffPanel, DiffPanel secondDiffPanel) {
+        this.firstEditor = firstDiffPanel.getEditor();
+        this.secondEditor = secondDiffPanel.getEditor();
+        this.firstScrollPane = firstDiffPanel.getScrollPane();
+        this.secondScrollPane = secondDiffPanel.getScrollPane();
         firstScrollPane.getViewport().addChangeListener(changeListener);
         secondScrollPane.getViewport().addChangeListener(changeListener);
     }

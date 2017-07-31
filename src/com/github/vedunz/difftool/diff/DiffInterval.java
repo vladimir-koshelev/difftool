@@ -36,7 +36,7 @@ public abstract class DiffInterval {
 
     public String toString() {
         return String.format("[(%d, %d)<=>(%d, %d)]",
-                beginFirst, beginFirst + length - 1, beginSecond, beginSecond + length - 1);
+                beginFirst, beginFirst + length - 1, beginSecond, beginSecond + length -1);
     }
 
     public Interval getInterval(boolean isFirst) {

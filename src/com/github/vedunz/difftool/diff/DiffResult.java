@@ -9,9 +9,9 @@ import java.util.List;
  */
 public class DiffResult {
 
-    private List<DiffInterval> intervals;
-    private int firstSize;
-    private int secondSize;
+    private final List<DiffInterval> intervals;
+    private final int firstSize;
+    private final int secondSize;
 
     public DiffResult(@NotNull List<DiffInterval> intervals, int firstSize, int secondSize) {
         this.intervals = intervals;

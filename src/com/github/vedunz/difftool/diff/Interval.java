@@ -4,8 +4,8 @@ package com.github.vedunz.difftool.diff;
  * Created by vedun on 22.07.2017.
  */
 public final class Interval {
-    private int start;
-    private int end;
+    private final int start;
+    private final int end;
 
     public Interval(int start, int end) {
         this.start = start;

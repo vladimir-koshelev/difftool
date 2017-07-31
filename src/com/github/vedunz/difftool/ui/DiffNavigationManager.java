@@ -20,18 +20,18 @@ public class DiffNavigationManager implements DiffConsumer {
     private JTextPane textPane;
     private boolean isFirst;
 
-    public DiffNavigationManager(JScrollPane scrollPane, JTextPane textPane, JButton prevButton, JButton nextButton, boolean isFirst) {
-        this.scrollPane = scrollPane;
-        this.textPane = textPane;
+    public DiffNavigationManager(DiffPanel diffPanel, boolean isFirst) {
+        this.scrollPane = diffPanel.getScrollPane();
+        this.textPane = diffPanel.getEditor();
         this.isFirst = isFirst;
 
-        prevButton.addActionListener((ActionEvent e) -> {
+        diffPanel.getPrevDiffButton().addActionListener((ActionEvent e) -> {
             if (diffResult == null)
                 return;
             gotoPrevDiff();
         });
 
-        nextButton.addActionListener((ActionEvent e) -> {
+        diffPanel.getNextDiffButton().addActionListener((ActionEvent e) -> {
             if (diffResult == null)
                 return;
             gotoNextDiff();

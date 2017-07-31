@@ -50,13 +50,12 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
         }
     };
 
-    public HighlightManager(JTextPane firstEditor, JTextPane secondEditor,
-                            JScrollPane firstScrollPane, JScrollPane secondScrollPane,
+    public HighlightManager(DiffPanel firstDiffPanel, DiffPanel secondDiffPanel,
                             LineDiffController lineDiffController) {
-        this.firstEditor = firstEditor;
-        this.secondEditor = secondEditor;
-        this.firstScrollPane = firstScrollPane;
-        this.secondScrollPane = secondScrollPane;
+        this.firstEditor = firstDiffPanel.getEditor();
+        this.secondEditor = secondDiffPanel.getEditor();
+        this.firstScrollPane = firstDiffPanel.getScrollPane();
+        this.secondScrollPane = secondDiffPanel.getScrollPane();
         this.lineDiffController = lineDiffController;
         firstScrollPane.getViewport().addChangeListener(changeListener);
         secondScrollPane.getViewport().addChangeListener(changeListener);

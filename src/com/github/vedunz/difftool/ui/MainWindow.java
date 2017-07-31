@@ -28,37 +28,23 @@ import java.util.List;
  */
 public final class MainWindow extends JFrame {
 
-    private JTextPane firstEditor = new JTextPane(new DefaultStyledDocument());
-    private JTextPane secondEditor = new JTextPane(new DefaultStyledDocument());
+    private final DiffPanel firstDiffPanel = new DiffPanel();
+    private final DiffPanel secondDiffPanel = new DiffPanel();
 
-    private JPanel firstPanel = new JPanel(new BorderLayout());
-    private JPanel secondPanel = new JPanel(new BorderLayout());
-    private JScrollPane firstScrollPane = new JScrollPane(firstPanel);
-    private JScrollPane secondScrollPane = new JScrollPane(secondPanel);
-    private JButton firstOpenButton = new JButton();
-    private JButton secondOpenButton = new JButton();
-    private JButton firstNextDiffButton = new JButton();
-    private JButton secondNextDiffButton = new JButton();
-    private JButton firstPrevDiffButton = new JButton();
-    private JButton secondPrevDiffButton = new JButton();
-    private UndoManager firstUndoManager = new IgnoreChangeUndoManager();
-    private UndoManager secondUndoManager = new IgnoreChangeUndoManager();
-    private JTextArea firstFileName = new JTextArea(1, 20);
-    private JTextArea secondFileName = new JTextArea(1, 20);
     private VersionManager versionManager = new VersionManager();
     private LineDiffConsumerList lineDiffConsumerList = new LineDiffConsumerList();
 
     ;
     private LineDiffController lineDiffController = new LineDiffController(versionManager, lineDiffConsumerList);
-    private HighlightManager mainWindowHighlightManager = new HighlightManager(firstEditor, secondEditor,
-            firstScrollPane, secondScrollPane, lineDiffController);
-    private ScrollManager scrollManager = new ScrollManager(firstEditor, secondEditor, firstScrollPane, secondScrollPane);
-    private DiffNavigationManager firstDiffNavigationManager = new DiffNavigationManager(firstScrollPane, firstEditor,
-            firstPrevDiffButton, firstNextDiffButton, true);
-    private DiffNavigationManager secondDiffNavigationManager = new DiffNavigationManager(secondScrollPane, secondEditor,
-            secondPrevDiffButton, secondNextDiffButton, false);
+    private HighlightManager mainWindowHighlightManager = new HighlightManager(firstDiffPanel, secondDiffPanel, lineDiffController);
+
+    private ScrollManager scrollManager = new ScrollManager(firstDiffPanel, secondDiffPanel);
+
+    private DiffNavigationManager firstDiffNavigationManager = new DiffNavigationManager(firstDiffPanel, true);
+    private DiffNavigationManager secondDiffNavigationManager = new DiffNavigationManager(secondDiffPanel, false);
     private DiffConsumerList diffConsumerList = new DiffConsumerList();
     private DiffController controller = new DiffController(versionManager, diffConsumerList);
+
     private final DocumentListener documentListener = new DocumentListener() {
 
         @Override
@@ -79,218 +65,37 @@ public final class MainWindow extends JFrame {
         private void processUpdate(DocumentEvent e) {
             versionManager.textUpdated();
             diffConsumerList.update(null);
-            if (e.getDocument() == firstEditor.getDocument()) {
-                List<String> lines = Arrays.asList(firstEditor.getText().split("\\r?\\n"));
+            if (e.getDocument() == firstDiffPanel.getEditor().getDocument()) {
+                List<String> lines = Arrays.asList(firstDiffPanel.getEditor().getText().split("\\r?\\n"));
                 controller.uploadFirstText(lines);
             } else {
-                List<String> lines = Arrays.asList(secondEditor.getText().split("\\r?\\n"));
+                List<String> lines = Arrays.asList(secondDiffPanel.getEditor().getText().split("\\r?\\n"));
                 controller.uploadSecondText(lines);
             }
             controller.requestDiff();
         }
     };
 
-    {
-        firstPanel.add(firstEditor, BorderLayout.CENTER);
-        secondPanel.add(secondEditor, BorderLayout.CENTER);
-    }
 
-    {
-        firstScrollPane.getVerticalScrollBar().setUnitIncrement(32);
-        secondScrollPane.getVerticalScrollBar().setUnitIncrement(32);
-    }
+    public MainWindow() {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setSize(screenSize.width * 3 / 4, screenSize.height * 3 / 4);
 
-    {
-        try {
-            Image img = ImageIO.read(Thread.currentThread().getContextClassLoader().getResource("images/document-open.png"));
-            firstOpenButton.setToolTipText("Open first file");
-            firstOpenButton.setIcon(new ImageIcon(img));
-            secondOpenButton.setToolTipText("Open second file");
-            secondOpenButton.setIcon(new ImageIcon(img));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
+        setLayout(new BoxLayout(getContentPane(), BoxLayout.LINE_AXIS));
+        add(firstDiffPanel);
+        add(secondDiffPanel);
 
-    {
-        try {
-            Image img = ImageIO.read(Thread.currentThread().getContextClassLoader().getResource("images/go-next.png"));
-            firstNextDiffButton.setToolTipText("Next diff");
-            firstNextDiffButton.setIcon(new ImageIcon(img));
-            secondNextDiffButton.setToolTipText("Next diff");
-            secondNextDiffButton.setIcon(new ImageIcon(img));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    {
-        try {
-            Image img = ImageIO.read(Thread.currentThread().getContextClassLoader().getResource("images/go-previous.png"));
-            firstPrevDiffButton.setIcon(new ImageIcon(img));
-            firstPrevDiffButton.setToolTipText("Previous diff");
-            secondPrevDiffButton.setIcon(new ImageIcon(img));
-            secondPrevDiffButton.setToolTipText("Previous diff");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    {
-        firstEditor.getDocument().addUndoableEditListener(firstUndoManager);
-        secondEditor.getDocument().addUndoableEditListener(secondUndoManager);
-
-        Action firstUndoAnction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (firstUndoManager.canUndo())
-                    firstUndoManager.undo();
-            }
-        };
-        Action secondUndoAnction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (secondUndoManager.canUndo())
-                    secondUndoManager.undo();
-            }
-        };
-        Action firstRedoAnction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (firstUndoManager.canRedo())
-                    firstUndoManager.redo();
-            }
-        };
-        Action secondRedoAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (secondUndoManager.canRedo())
-                    firstUndoManager.redo();
-            }
-        };
-
-        String keyStrokeAndKeyUndo = "control Z";
-        String keyStrokeAndKeyRedo = "control Y";
-        KeyStroke keyStrokeUndo = KeyStroke.getKeyStroke(keyStrokeAndKeyUndo);
-        firstEditor.getInputMap().put(keyStrokeUndo, keyStrokeAndKeyUndo);
-        firstEditor.getActionMap().put(keyStrokeAndKeyUndo, firstUndoAnction);
-        secondEditor.getInputMap().put(keyStrokeUndo, keyStrokeAndKeyUndo);
-        secondEditor.getActionMap().put(keyStrokeAndKeyUndo, secondUndoAnction);
-
-        KeyStroke keyStrokeRedo = KeyStroke.getKeyStroke(keyStrokeAndKeyRedo);
-        firstEditor.getInputMap().put(keyStrokeRedo, keyStrokeAndKeyRedo);
-        firstEditor.getActionMap().put(keyStrokeAndKeyRedo, firstRedoAnction);
-        secondEditor.getInputMap().put(keyStrokeRedo, keyStrokeAndKeyRedo);
-        secondEditor.getActionMap().put(keyStrokeAndKeyRedo, secondRedoAction);
-    }
-
-    {
         lineDiffConsumerList.add(mainWindowHighlightManager);
-    }
 
-    {
         diffConsumerList.add(mainWindowHighlightManager);
         diffConsumerList.add(scrollManager);
         diffConsumerList.add(firstDiffNavigationManager);
         diffConsumerList.add(secondDiffNavigationManager);
-    }
-    public MainWindow() {
-        FileOpenActionListener fileOpenActionListener = new FileOpenActionListener();
 
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setSize(screenSize.width * 3 / 4, screenSize.height * 3 / 4);
-        setLayout(new GridBagLayout());
-
-        firstOpenButton.addActionListener(fileOpenActionListener);
-        secondOpenButton.addActionListener(fileOpenActionListener);
-
-        createFilePanel(firstOpenButton, firstPrevDiffButton, firstNextDiffButton, firstFileName, this, firstScrollPane, 0);
-        createFilePanel(secondOpenButton, secondPrevDiffButton, secondNextDiffButton, secondFileName, this, secondScrollPane, 4);
-
-        firstEditor.getStyledDocument().addDocumentListener(documentListener);
-        secondEditor.getStyledDocument().addDocumentListener(documentListener);
+        firstDiffPanel.getEditor().getStyledDocument().addDocumentListener(documentListener);
+        secondDiffPanel.getEditor().getStyledDocument().addDocumentListener(documentListener);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }
-
-    private static String readAllLines(BufferedReader buffIn) throws IOException {
-        StringBuilder allLines = new StringBuilder();
-        String line;
-        while ((line = buffIn.readLine()) != null) {
-            allLines.append(line + System.lineSeparator());
-        }
-        return allLines.toString();
-    }
-
-    private static void createFilePanel(JButton button, JButton prev, JButton next, JTextArea textArea, Container container, JScrollPane scrollPane,
-                                        int offset) {
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = offset;
-        gbc.gridy = 0;
-        gbc.weightx = 0;
-        gbc.weighty = 0;
-        gbc.fill = GridBagConstraints.NONE;
-
-        container.add(button, gbc);
-        gbc.gridx++;
-        container.add(prev, gbc);
-        gbc.gridx++;
-        container.add(next, gbc);
-
-        gbc.gridx++;
-        gbc.weightx = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        container.add(textArea, gbc);
-
-        gbc.gridy = 1;
-        gbc.gridx = offset;
-        gbc.weighty = 1;
-        gbc.gridwidth = 4;
-        gbc.fill = GridBagConstraints.BOTH;
-
-        container.add(scrollPane, gbc);
-    }
-
-    public class IgnoreChangeUndoManager extends UndoManager {
-        @Override
-        public void undoableEditHappened(UndoableEditEvent e) {
-            AbstractDocument.DefaultDocumentEvent event =
-                    (AbstractDocument.DefaultDocumentEvent) e.getEdit();
-
-            if (!event.getType().equals(DocumentEvent.EventType.CHANGE))
-                super.undoableEditHappened(e);
-        }
-    }
-
-    public class FileOpenActionListener implements ActionListener {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            JFileChooser fileChooser = new JFileChooser(System.getProperty("user.dir"));
-            try {
-                int result = fileChooser.showOpenDialog(MainWindow.this);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    FileReader reader = new FileReader(selectedFile);
-                    BufferedReader bufferedReader = new BufferedReader(reader);
-                    if (e.getSource() == firstOpenButton) {
-                        firstEditor.setText(readAllLines(bufferedReader));
-                        firstFileName.setText(selectedFile.getAbsolutePath());
-                    } else {
-                        secondEditor.setText(readAllLines(bufferedReader));
-                        secondFileName.setText(selectedFile.getAbsolutePath());
-                    }
-                }
-            } catch (IOException ioe) {
-                JOptionPane.showMessageDialog(MainWindow.this,
-                        ioe.toString(),
-                        "Cannot open file",
-                        JOptionPane.ERROR_MESSAGE);
-            }
-
-        }
-    }
-
 }
