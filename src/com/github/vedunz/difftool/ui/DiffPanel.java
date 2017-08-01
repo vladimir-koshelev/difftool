@@ -9,7 +9,6 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -24,10 +23,12 @@ public class DiffPanel extends JPanel {
     private final JButton prevDiffButton = new JButton();
     private final UndoManager undoManager = new IgnoreChangeUndoManager();
     private final JTextArea fileName = new JTextArea(1, 20);
+    private final LinePanel linePanel;
 
 
     public DiffPanel() {
         setLayout(new GridBagLayout());
+        linePanel = new LinePanel(editor, scrollPane.getViewport());
         loadButtonImages();
         addOpenFileDialog();
         addUndoRedoActions();
@@ -66,6 +67,8 @@ public class DiffPanel extends JPanel {
     public JTextArea getFileName() {
         return fileName;
     }
+
+    public LinePanel getLinePanel() { return linePanel; }
 
     private static String readAllLines(BufferedReader buffIn) throws IOException {
         StringBuilder allLines = new StringBuilder();
@@ -159,12 +162,14 @@ public class DiffPanel extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
+        gbc.gridwidth = 2;
         gbc.weightx = 0;
         gbc.weighty = 0;
         gbc.fill = GridBagConstraints.NONE;
 
         add(openButton, gbc);
-        gbc.gridx++;
+        gbc.gridx += 2;
+        gbc.gridwidth = 1;
         add(prevDiffButton, gbc);
         gbc.gridx++;
         add(nextDiffButton, gbc);
@@ -175,13 +180,43 @@ public class DiffPanel extends JPanel {
 
         add(fileName, gbc);
 
-        gbc.gridy = 1;
+        JPanel tempEditorPanel = new JPanel(new BorderLayout());
+        JPanel editorPanel = new JPanel();
+        tempEditorPanel.add(editorPanel, BorderLayout.CENTER);
+        editorPanel.setLayout(new GridBagLayout());
+
         gbc.gridx = 0;
+        gbc.gridy = 0;
         gbc.weighty = 1;
-        gbc.gridwidth = 4;
+        gbc.weightx = 0;
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.VERTICAL;
+
+
+        editorPanel.add(linePanel, gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.weighty = 1;
+        gbc.weightx = 1;
+        gbc.gridwidth = 6;
         gbc.fill = GridBagConstraints.BOTH;
 
-        add(scrollPane, gbc);
+
+        editorPanel.add(scrollPane, gbc);
+
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weighty = 1;
+        gbc.weightx = 1;
+        gbc.gridwidth = 6;
+        gbc.fill = GridBagConstraints.BOTH;
+
+        add(tempEditorPanel, gbc);
+
+
+
     }
 
     private class IgnoreChangeUndoManager extends UndoManager {

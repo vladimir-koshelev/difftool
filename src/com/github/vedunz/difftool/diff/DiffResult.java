@@ -23,7 +23,7 @@ public class DiffResult {
         if (intervals.size() == 0)
             return null;
 
-        int idx = getIntervalIndexForLPosition(position, isFirst);
+        int idx = getIntervalIndexForPosition(position, isFirst);
         Interval interval = (isFirst) ? intervals.get(idx).getFirstInterval() : intervals.get(idx).getSecondInterval();
         if (interval.isLineInside(position) || interval.isLineAfter(position))
             return intervals.get(idx);
@@ -37,7 +37,7 @@ public class DiffResult {
         if (intervals.size() == 0)
             return null;
 
-        int idx = getIntervalIndexForLPosition(line, isFirst);
+        int idx = getIntervalIndexForPosition(line, isFirst);
         Interval interval = (isFirst) ? intervals.get(idx).getFirstInterval() : intervals.get(idx).getSecondInterval();
         if (interval.isLineInside(line) || interval.isLineBefore(line))
             return intervals.get(idx);
@@ -45,7 +45,13 @@ public class DiffResult {
             return intervals.get(idx + 1);
 
         return null;
+    }
 
+    public boolean isLineInSame(final int line, final boolean isFirst) {
+        if (intervals.isEmpty())
+            return false;
+        int n =  getIntervalIndexForPosition(line, isFirst);
+        return (intervals.get(n).getInterval(isFirst).isLineInside(line));
     }
 
     public List<DiffInterval> getIntervals() {
@@ -64,7 +70,9 @@ public class DiffResult {
         return isFirst ? getFirstSize() : getSecondSize();
     }
 
-    private int getIntervalIndexForLPosition(int position, boolean isFirst) {
+
+
+    private int getIntervalIndexForPosition(int position, boolean isFirst) {
         int l = 0;
         int r = intervals.size() - 1;
 
