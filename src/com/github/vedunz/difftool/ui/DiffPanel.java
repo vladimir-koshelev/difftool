@@ -192,7 +192,6 @@ public class DiffPanel extends JPanel {
         gbc.gridwidth = 1;
         gbc.fill = GridBagConstraints.VERTICAL;
 
-
         editorPanel.add(linePanel, gbc);
 
         gbc.gridx = 1;

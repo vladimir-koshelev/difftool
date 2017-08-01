@@ -36,24 +36,10 @@ public class LinePanel extends JPanel {
         minWidth = fontMetrics.charWidth(' ') * 7;
         setMinimumSize(new Dimension(minWidth, 0));
 
-        this.textPane.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(final DocumentEvent e) {
-                LinePanel.this.repaint();
-            }
-
-            @Override
-            public void removeUpdate(final DocumentEvent e) {
-                LinePanel.this.repaint();
-            }
-
-            @Override
-            public void changedUpdate(final DocumentEvent e) {
-
-            }
+        viewport.addChangeListener(e -> {
+            System.out.println(String.format("%d %d", viewport.getViewPosition().x, viewport.getViewPosition().y));
+            LinePanel.this.repaint();
         });
-
-        viewport.addChangeListener(e -> { LinePanel.this.repaint();});
     }
 
     public void setColorProvider(final BackgroundColorProvider colorProvider) {
