@@ -75,12 +75,12 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
         this.diffResult = diffResult;
         firstRequestedChunks.clear();
         secondRequestedChunks.clear();
-        firstLineColorCache.clear();
-        secondLineColorCache.clear();
         if (diffResult != null) {
+            firstLineColorCache.clear();
+            secondLineColorCache.clear();
+            calculateLinesForDiff(diffResult);
             firstLinePanel.repaint();
             secondLinePanel.repaint();
-            calculateLinesForDiff(diffResult);
         } else {
             firstLines2secondLines.clear();
             secondLines2firstLines.clear();

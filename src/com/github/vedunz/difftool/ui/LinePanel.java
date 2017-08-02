@@ -65,7 +65,8 @@ public class LinePanel extends JPanel {
 
                 AttributedString stringToDisplay = new AttributedString(lineMessage);
                 if (colorProvider != null) {
-                    stringToDisplay.addAttribute(TextAttribute.BACKGROUND, colorProvider.getColorForLine(i));
+                    final Color color = colorProvider.getColorForLine(i);
+                    stringToDisplay.addAttribute(TextAttribute.BACKGROUND, color);
 
                 }
 
