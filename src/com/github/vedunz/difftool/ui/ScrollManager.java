@@ -7,10 +7,9 @@ import com.github.vedunz.difftool.diff.Interval;
 import com.github.vedunz.difftool.ui.util.UIUtils;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Element;
+import java.awt.*;
 
 /**
  * Created by vedun on 23.07.2017.
@@ -25,51 +24,33 @@ public class ScrollManager implements DiffConsumer {
 
     private DiffResult diffResult;
 
+    private boolean ignoreUpdate = false;
+
     public ScrollManager(DiffPanel firstDiffPanel, DiffPanel secondDiffPanel) {
         this.firstEditor = firstDiffPanel.getEditor();
         this.secondEditor = secondDiffPanel.getEditor();
         this.firstScrollPane = firstDiffPanel.getScrollPane();
         this.secondScrollPane = secondDiffPanel.getScrollPane();
+        final JViewport secondViewport = secondScrollPane.getViewport();
+        final JViewport firstViewport = firstScrollPane.getViewport();
         final ChangeListener changeListener = e -> {
-            if (diffResult == null)
+            if (diffResult == null || ignoreUpdate)
                 return;
             try {
+                ignoreUpdate = true;
                 if (firstScrollPane.getViewport() == e.getSource()) {
-                    Interval lines = UIUtils.getVisibleLines(firstScrollPane.getViewport(), firstEditor);
-                    if (isLineNearTheEnd(lines.getEnd(), firstEditor))
-                        return;
-
-                    DiffInterval diffInterval = diffResult.getIntervalAfter(lines.getStart(), true);
-                    if (diffInterval == null)
-                        return;
-                    if (lines.isLineAfter(diffInterval.getBeginFirst()))
-                        return;
-                    int delta = lines.getStart() - diffInterval.getBeginFirst();
-                    int firstVisibleLineInSecondDiffInterval = diffInterval.getBeginSecond() + delta;
-
-                    UIUtils.showLine(secondScrollPane.getViewport(), secondEditor, firstVisibleLineInSecondDiffInterval);
-                    UIUtils.showLine(firstScrollPane.getViewport(), firstEditor, lines.getStart());
+                    syncScrollPanes(firstEditor, secondEditor, firstViewport, secondViewport, true);
                 } else {
-                    Interval lines = UIUtils.getVisibleLines(secondScrollPane.getViewport(), secondEditor);
-                    if (isLineNearTheEnd(lines.getEnd(), secondEditor))
-                        return;
-
-                    DiffInterval diffInterval = diffResult.getIntervalAfter(lines.getStart(), false);
-                    if (diffInterval == null)
-                        return;
-                    if (lines.isLineAfter(diffInterval.getBeginSecond()))
-                        return;
-                    int delta = lines.getStart() - diffInterval.getBeginSecond();
-                    int firstVisibleLineInFirstDiffInterval = diffInterval.getBeginFirst() + delta;
-                    UIUtils.showLine(firstScrollPane.getViewport(), firstEditor, firstVisibleLineInFirstDiffInterval);
-                    UIUtils.showLine(secondScrollPane.getViewport(), secondEditor, lines.getStart());
+                    syncScrollPanes(secondEditor, firstEditor, secondViewport, firstViewport, false);
                 }
             } catch (BadLocationException e1) {
                 e1.printStackTrace();
+            } finally {
+                ignoreUpdate = false;
             }
         };
         firstScrollPane.getViewport().addChangeListener(changeListener);
-        secondScrollPane.getViewport().addChangeListener(changeListener);
+        secondViewport.addChangeListener(changeListener);
     }
 
     @Override
@@ -77,9 +58,35 @@ public class ScrollManager implements DiffConsumer {
         this.diffResult = diffResult;
     }
 
-    private boolean isLineNearTheEnd(int line, JTextPane editor) {
-        Element element = editor.getDocument().getDefaultRootElement();
-        return element.getElementCount() - line < 3;
+
+    private void syncScrollPanes(final JTextPane editor,
+                                 final JTextPane anotherEditor,
+                                 final JViewport viewport,
+                                 final JViewport anotherViewport,
+                                 boolean isFirst
+    ) throws BadLocationException {
+        Interval lines = UIUtils.getVisibleLines(viewport, editor);
+        int yOffset = viewport.getViewPosition().y;
+        int offset = editor.viewToModel(new Point(0, yOffset));
+        int line = UIUtils.offsetToLine(offset, editor);
+
+        DiffInterval diffInterval = diffResult.getIntervalAfter(line, isFirst);
+        if (diffInterval == null)
+            return;
+        if (lines.isLineAfter(diffInterval.getInterval(isFirst).getStart()))
+            return;
+        int firstOffset = UIUtils.lineToOffset(diffInterval.getInterval(isFirst).getStart(), editor);
+        int secondOffset = UIUtils.lineToOffset(diffInterval.getInterval(!isFirst).getStart(), anotherEditor);
+        int firstYPos = editor.modelToView(firstOffset).y;
+        int secondYPos = anotherEditor.modelToView(secondOffset).y;
+        int newSecondPos = secondYPos - (firstYPos - yOffset);
+        if (newSecondPos != anotherViewport.getViewPosition().y) {
+            if (newSecondPos + anotherViewport.getViewRect().height < anotherEditor.getHeight())
+                anotherViewport.setViewPosition(new Point(
+                        anotherViewport.getViewPosition().x, newSecondPos
+                ));
+        }
     }
+
 
 }

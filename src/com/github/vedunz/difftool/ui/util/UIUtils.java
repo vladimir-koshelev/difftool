@@ -35,4 +35,14 @@ public class UIUtils {
             viewport.setViewPosition(new Point(0, (int) rectangle.getY()));
         }
     }
+
+    public static int offsetToLine(int offset, JTextPane textPane) {
+        Element rootElement = textPane.getDocument().getDefaultRootElement();
+        return rootElement.getElementIndex(offset);
+    }
+
+    public static int lineToOffset(int line, JTextPane textPane) {
+        Element rootElement = textPane.getDocument().getDefaultRootElement();
+        return rootElement.getElement(line).getStartOffset();
+    }
 }

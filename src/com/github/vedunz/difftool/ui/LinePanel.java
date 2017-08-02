@@ -51,12 +51,16 @@ public class LinePanel extends JPanel {
         super.paintComponent(g);
         try {
             Interval interval = UIUtils.getVisibleLines(viewport, textPane);
-            int aligny = fontMetrics.getHeight();
+            int starty = textPane.modelToView(UIUtils.lineToOffset(interval.getStart(), textPane)).y;
+            int startyViewport = viewport.getViewPosition().y;
+            int aligny = fontMetrics.getHeight() - (startyViewport - starty);
 
             for (int i = interval.getStart(); i <= interval.getEnd(); ++i) {
                 int y = fontMetrics.getHeight() * (i - interval.getStart());
 
                 String lineMessage = String.valueOf(i + 1) + " ";
+                while (lineMessage.length() < 7)
+                    lineMessage = " " + lineMessage;
                 int alignx =  minWidth - fontMetrics.stringWidth(lineMessage);
 
                 AttributedString stringToDisplay = new AttributedString(lineMessage);

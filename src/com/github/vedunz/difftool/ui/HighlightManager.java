@@ -21,6 +21,7 @@ import java.util.List;
  */
 public class HighlightManager implements DiffConsumer, LineDiffConsumer {
 
+    private static final int CHUNK_SIZE = 128;
     private final JTextPane firstEditor;
     private final JTextPane secondEditor;
     private final JScrollPane firstScrollPane;
@@ -32,8 +33,8 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
     private final LineDiffController lineDiffController;
     private final Map<Integer, Integer> firstLines2secondLines = new HashMap<>();
     private final Map<Integer, Integer> secondLines2firstLines = new HashMap<>();
-    private final Set<Integer> firstProcessedLines = new HashSet<>();
-    private final Set<Integer> secondProcessedLines = new HashSet<>();
+    private final Set<Integer> firstRequestedChunks = new HashSet<>();
+    private final Set<Integer> secondRequestedChunks  = new HashSet<>();
     private final Map<Integer, Color> firstLineColorCache = new HashMap<>();
     private final Map<Integer, Color> secondLineColorCache = new HashMap<>();
 
@@ -69,8 +70,8 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
     @Override
     public void updateDiffResult(DiffResult diffResult) {
         this.diffResult = diffResult;
-        firstProcessedLines.clear();
-        secondProcessedLines.clear();
+        firstRequestedChunks.clear();
+        secondRequestedChunks.clear();
         firstLineColorCache.clear();
         secondLineColorCache.clear();
         if (diffResult != null) {
@@ -100,12 +101,51 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
         return editor.getDocument().getText(element.getStartOffset(), element.getEndOffset() - element.getStartOffset() - 1);
     }
 
+    private void requestLinesInVisibleAreaFirst() throws BadLocationException {
+        Interval visibleLines = UIUtils.getVisibleLines(firstScrollPane.getViewport(), firstEditor);
+        int firstChunk = lineToChunk(visibleLines.getStart());
+        int lastChunk = lineToChunk(visibleLines.getEnd());
+        int maxChuck = lineToChunk(diffResult.getFirstSize() - 1);
+        if (firstChunk - 1 >= 0)
+            requestChunkFirst(firstChunk - 1);
+        requestChunkFirst(firstChunk);
+        requestChunkFirst(lastChunk);
+        if (lastChunk + 1 <= maxChuck)
+            requestChunkFirst(lastChunk + 1);
+
+    }
+
     private void requestLinesInVisibleAreaSecond() throws BadLocationException {
         Interval visibleLines = UIUtils.getVisibleLines(secondScrollPane.getViewport(), secondEditor);
-        for (int secondLine = visibleLines.getStart(); secondLine <= visibleLines.getEnd(); ++secondLine) {
-            if (secondProcessedLines.contains(secondLine))
-                continue;
-            secondProcessedLines.add(secondLine);
+        int firstChunk = lineToChunk(visibleLines.getStart());
+        int lastChunk = lineToChunk(visibleLines.getEnd());
+        int maxChuck = lineToChunk(diffResult.getSecondSize() - 1);
+        if (firstChunk - 1 >= 0)
+            requestChunkSecond(firstChunk - 1);
+        requestChunkSecond(firstChunk);
+        requestChunkSecond(lastChunk);
+        if (lastChunk + 1 <= maxChuck)
+            requestChunkSecond(lastChunk + 1);
+    }
+
+
+    private void requestChunkFirst(int chunk) throws BadLocationException {
+        if (firstRequestedChunks.contains(chunk))
+            return;
+        firstRequestedChunks.add(chunk);
+        requestLinesInIntervalFirst(chunkToInterval(chunk));
+    }
+
+    private void requestChunkSecond(int chunk) throws BadLocationException {
+        if (secondRequestedChunks.contains(chunk))
+            return;
+        secondRequestedChunks.add(chunk);
+        requestLinesInIntervalSecond(chunkToInterval(chunk));
+    }
+
+    private void requestLinesInIntervalSecond(final Interval visibleLines) throws BadLocationException {
+        int end = Math.min(diffResult.getSecondSize() - 1, visibleLines.getEnd());
+        for (int secondLine = visibleLines.getStart(); secondLine <= end; ++secondLine) {
             if (secondLines2firstLines.containsKey(secondLine)) {
                 int firstLine = secondLines2firstLines.get(secondLine);
                 lineDiffController.requestDiff(getLineText(firstEditor, firstLine),
@@ -120,12 +160,9 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
         }
     }
 
-    private void requestLinesInVisibleAreaFirst() throws BadLocationException {
-        Interval visibleLines = UIUtils.getVisibleLines(firstScrollPane.getViewport(), firstEditor);
-        for (int firstLine = visibleLines.getStart(); firstLine <= visibleLines.getEnd(); ++firstLine) {
-            if (firstProcessedLines.contains(firstLine))
-                continue;
-            firstProcessedLines.add(firstLine);
+    private void requestLinesInIntervalFirst(final Interval visibleLines) throws BadLocationException {
+        int end = Math.min(diffResult.getFirstSize() - 1, visibleLines.getEnd());
+        for (int firstLine = visibleLines.getStart(); firstLine <= end; ++firstLine) {
             if (firstLines2secondLines.containsKey(firstLine)) {
                 int secondLine = firstLines2secondLines.get(firstLine);
                 lineDiffController.requestDiff(getLineText(firstEditor, firstLine),
@@ -221,6 +258,14 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
         changeStyleInRange(editor, start, end,
                 styleContext.getStyle(isFirst ? StyleManager.DIFF_STYLE_NAME : StyleManager.SAME_STYLE_NAME));
 
+    }
+    
+    private int lineToChunk(int line) {
+        return line / CHUNK_SIZE;
+    }
+    
+    private Interval chunkToInterval(int chunk) {
+        return new Interval(chunk * CHUNK_SIZE, chunk * CHUNK_SIZE + CHUNK_SIZE - 1);
     }
 
     private BackgroundColorProvider getFirstBackgroundColorProvider() {
