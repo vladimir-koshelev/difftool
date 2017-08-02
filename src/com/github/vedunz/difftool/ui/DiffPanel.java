@@ -27,6 +27,7 @@ public class DiffPanel extends JPanel {
 
 
     public DiffPanel() {
+        fileName.setEditable(false);
         setLayout(new GridBagLayout());
         linePanel = new LinePanel(editor, scrollPane.getViewport());
         loadButtonImages();
