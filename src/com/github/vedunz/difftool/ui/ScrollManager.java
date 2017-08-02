@@ -81,7 +81,8 @@ public class ScrollManager implements DiffConsumer {
         int secondYPos = anotherEditor.modelToView(secondOffset).y;
         int newSecondPos = secondYPos - (firstYPos - yOffset);
         if (newSecondPos != anotherViewport.getViewPosition().y) {
-            if (newSecondPos + anotherViewport.getViewRect().height < anotherEditor.getHeight())
+            if (newSecondPos + anotherViewport.getViewRect().height < anotherEditor.getHeight() &&
+                    newSecondPos >= 0)
                 anotherViewport.setViewPosition(new Point(
                         anotherViewport.getViewPosition().x, newSecondPos
                 ));
