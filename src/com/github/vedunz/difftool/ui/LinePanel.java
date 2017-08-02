@@ -11,6 +11,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.Style;
 import javax.swing.text.StyleContext;
+import javax.xml.soap.Text;
 import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.text.AttributedString;
@@ -37,9 +38,13 @@ public class LinePanel extends JPanel {
         setMinimumSize(new Dimension(minWidth, 0));
 
         viewport.addChangeListener(e -> {
-            System.out.println(String.format("%d %d", viewport.getViewPosition().x, viewport.getViewPosition().y));
             LinePanel.this.repaint();
         });
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        return new Dimension(minWidth, 0);
     }
 
     public void setColorProvider(final BackgroundColorProvider colorProvider) {
@@ -64,10 +69,12 @@ public class LinePanel extends JPanel {
                 int alignx =  minWidth - fontMetrics.stringWidth(lineMessage);
 
                 AttributedString stringToDisplay = new AttributedString(lineMessage);
+                final StyleContext styleContext = StyleManager.getStyleContext();
+                final Style style = styleContext.getStyle(StyleManager.MAIN_STYLE_NAME);
+                stringToDisplay.addAttribute(TextAttribute.FONT, styleContext.getFont(style));
                 if (colorProvider != null) {
                     final Color color = colorProvider.getColorForLine(i);
                     stringToDisplay.addAttribute(TextAttribute.BACKGROUND, color);
-
                 }
 
                 g.drawString(stringToDisplay.getIterator(), alignx, aligny + y);
