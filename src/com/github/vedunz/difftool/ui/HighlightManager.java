@@ -33,6 +33,9 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
     private final LineDiffController lineDiffController;
     private final Map<Integer, Integer> firstLines2secondLines = new HashMap<>();
     private final Map<Integer, Integer> secondLines2firstLines = new HashMap<>();
+    private final Set<Integer> linesWithInLineDiffFirst = new HashSet<>();
+    private final Set<Integer> linesWithInLineDiffSecond = new HashSet<>();
+
     private final Set<Integer> firstRequestedChunks = new HashSet<>();
     private final Set<Integer> secondRequestedChunks  = new HashSet<>();
     private final Map<Integer, Color> firstLineColorCache = new HashMap<>();
@@ -151,11 +154,11 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
                 lineDiffController.requestDiff(getLineText(firstEditor, firstLine),
                         getLineText(secondEditor, secondLine), firstLine, secondLine);
                 removeFromLinesForLineDiff(firstLine, secondLine);
-            } else {
+            } else if (!linesWithInLineDiffSecond.contains(secondLine)) {
                 if (diffResult.isLineInSame(secondLine, false))
                     changeStyleForLine(secondEditor, secondLine, styleContext.getStyle(StyleManager.MAIN_STYLE_NAME));
                 else
-                    changeStyleForLine(secondEditor, secondLine, styleContext.getStyle(StyleManager.SAME_STYLE_NAME));
+                    changeStyleForLine(secondEditor, secondLine, styleContext.getStyle(StyleManager.ADDED_STYLE_NAME));
             }
         }
     }
@@ -168,18 +171,18 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
                 lineDiffController.requestDiff(getLineText(firstEditor, firstLine),
                         getLineText(secondEditor, secondLine), firstLine, secondLine);
                 removeFromLinesForLineDiff(firstLine, secondLine);
-            } else {
+            } else if (!linesWithInLineDiffFirst.contains(firstLine)){
                 if (diffResult.isLineInSame(firstLine, true))
                     changeStyleForLine(firstEditor, firstLine, styleContext.getStyle(StyleManager.MAIN_STYLE_NAME));
                 else
-                    changeStyleForLine(firstEditor, firstLine, styleContext.getStyle(StyleManager.DIFF_STYLE_NAME));
+                    changeStyleForLine(firstEditor, firstLine, styleContext.getStyle(StyleManager.REMOVED_STYLE_NAME));
             }
         }
     }
 
-    private void changeStyleForLine(final JTextPane secondEditor, final int line, final Style style) {
-        Element element = secondEditor.getDocument().getDefaultRootElement().getElement(line);
-        changeStyleInRange(secondEditor, element.getStartOffset(), element.getEndOffset() - 1, style);
+    private void changeStyleForLine(final JTextPane editor, final int line, final Style style) {
+        Element element = editor.getDocument().getDefaultRootElement().getElement(line);
+        changeStyleInRange(editor, element.getStartOffset(), element.getEndOffset() - 1, style);
     }
 
     private void changeStyleInRange(JTextPane textPane, int start, int end, Style style) {
@@ -191,6 +194,8 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
     private void calculateLinesForDiff(DiffResult diffResult) {
         firstLines2secondLines.clear();
         secondLines2firstLines.clear();
+        linesWithInLineDiffFirst.clear();
+        linesWithInLineDiffSecond.clear();
         List<DiffInterval> intervals = diffResult.getIntervals();
         int firstPos = 0, secondPos = 0;
         int curInterval = 0;
@@ -200,6 +205,8 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
                     interval.getSecondInterval().isLineBefore(secondPos))) {
                 firstLines2secondLines.put(firstPos, secondPos);
                 secondLines2firstLines.put(secondPos, firstPos);
+                linesWithInLineDiffFirst.add(firstPos);
+                linesWithInLineDiffSecond.add(secondPos);
                 firstPos++;
                 secondPos++;
             } else {
@@ -240,11 +247,11 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
         }
         if (firstStartOffset <= firstEndOffset)
             changeStyleInRange(firstEditor, firstCurrentOffset, firstEndOffset,
-                    styleContext.getStyle(StyleManager.DIFF_STYLE_NAME_BOLD));
+                    styleContext.getStyle(StyleManager.REMOVED_STYLE_NAME_BOLD));
 
         if (secondStartOffset <= secondEndOffset)
             changeStyleInRange(secondEditor, secondCurrentOffset, secondEndOffset,
-                    styleContext.getStyle(StyleManager.SAME_STYLE_NAME_BOLD));
+                    styleContext.getStyle(StyleManager.ADDED_STYLE_NAME_BOLD));
     }
 
     private void changeStyleForIntervalInLine(int startOffset, int currentOffset, Interval interval, JTextPane editor,
@@ -253,10 +260,10 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
         int end = startOffset + interval.getEnd();
         if (currentOffset < start) {
             changeStyleInRange(editor, currentOffset, start - 1,
-                    styleContext.getStyle(isFirst ? StyleManager.DIFF_STYLE_NAME_BOLD : StyleManager.SAME_STYLE_NAME_BOLD));
+                    styleContext.getStyle(isFirst ? StyleManager.REMOVED_STYLE_NAME_BOLD : StyleManager.ADDED_STYLE_NAME_BOLD));
         }
         changeStyleInRange(editor, start, end,
-                styleContext.getStyle(isFirst ? StyleManager.DIFF_STYLE_NAME : StyleManager.SAME_STYLE_NAME));
+                styleContext.getStyle(isFirst ? StyleManager.REMOVED_STYLE_NAME : StyleManager.ADDED_STYLE_NAME));
 
     }
     
@@ -277,7 +284,7 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
             else {
                 color = styleContext.getBackground(styleContext.getStyle(
                         (diffResult != null) && !diffResult.isLineInSame(line, true)
-                                ? StyleManager.DIFF_STYLE_NAME : StyleManager.MAIN_STYLE_NAME));
+                                ? StyleManager.REMOVED_STYLE_NAME : StyleManager.MAIN_STYLE_NAME));
                 firstLineColorCache.put(line, color);
             }
             return color;
@@ -292,7 +299,7 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
             else {
                 color = styleContext.getBackground(styleContext.getStyle(
                         (diffResult != null) && !diffResult.isLineInSame(line, false)
-                                ? StyleManager.SAME_STYLE_NAME : StyleManager.MAIN_STYLE_NAME));
+                                ? StyleManager.ADDED_STYLE_NAME : StyleManager.MAIN_STYLE_NAME));
                 secondLineColorCache.put(line, color);
             }
             return color;
