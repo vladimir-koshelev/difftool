@@ -118,42 +118,16 @@ public class DiffPanel extends JPanel {
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
                     List<String> lines = Files.readAllLines(selectedFile.toPath());
+                    editor.setText("");
 
                     ProgressMonitor progressMonitor = new ProgressMonitor(DiffPanel.this,
-                            "Opening file: " + selectedFile.getAbsolutePath(), "aba", 0, lines.size());
+                            "Opening file: " + selectedFile.getAbsolutePath(), "", 0, lines.size());
                     progressMonitor.setProgress(0);
-                    progressMonitor.setMillisToPopup(100);
+                    progressMonitor.setMillisToPopup(500);
 
-                    Thread thread = new Thread(() -> {
-                        StyledDocument document = editor.getStyledDocument();
-                        for (int i = 0, n = lines.size() / 512; i <= n; ++i) {
-                            final int curIteration = i;
-                            fileName.setText(selectedFile.getAbsolutePath());
-                            int m = Math.min(lines.size(), (curIteration + 1) * 512);
-                            StringBuilder builder = new StringBuilder();
-                            for (int j = curIteration * 512; j < m; ++j) {
-                                builder.append(lines.get(j));
-                                builder.append(System.lineSeparator());
-                            }
+                    StyledDocument document = editor.getStyledDocument();
 
-                            SwingUtilities.invokeLater(() -> {
-                                try {
-                                    if (progressMonitor.isCanceled())
-                                        return;
-                                    document.insertString(document.getLength(),
-                                            builder.toString(), null);
-                                    progressMonitor.setNote(String.format("%d / %d", (curIteration + 1) * 512, lines.size()));
-                                    progressMonitor.setProgress((curIteration + 1) * 512);
-                                } catch (BadLocationException e1) {
-                                    e1.printStackTrace();
-                                }
-                            });
-                        }
-                    });
-
-                    thread.start();
-
-
+                    runUploadFileInEWT(selectedFile, lines, progressMonitor, document, 0);
                 }
             } catch (IOException ioe) {
                 JOptionPane.showMessageDialog(DiffPanel.this,
@@ -163,6 +137,32 @@ public class DiffPanel extends JPanel {
             }
         }
         );
+    }
+
+    private void runUploadFileInEWT(final File selectedFile, final List<String> lines, final ProgressMonitor progressMonitor, final StyledDocument document, final int i) {
+        final int curIteration = i;
+        if (i * 512 >= lines.size())
+            return;
+        if (progressMonitor.isCanceled()) {
+            editor.setText("");
+            return;
+        }
+        fileName.setText(selectedFile.getAbsolutePath());
+        int m = Math.min(lines.size(), (curIteration + 1) * 512);
+        StringBuilder builder = new StringBuilder();
+        for (int j = curIteration * 512; j < m; ++j) {
+            builder.append(lines.get(j));
+            builder.append(System.lineSeparator());
+        }
+        try {
+            document.insertString(document.getLength(),
+                    builder.toString(), null);
+            progressMonitor.setNote(String.format("%d / %d", (curIteration + 1) * 512, lines.size()));
+            progressMonitor.setProgress((curIteration + 1) * 512);
+        } catch (BadLocationException e1) {
+            e1.printStackTrace();
+        }
+        SwingUtilities.invokeLater( () -> runUploadFileInEWT(selectedFile, lines, progressMonitor, document, i + 1));
     }
 
     private void loadButtonImages() {
