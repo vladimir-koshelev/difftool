@@ -6,8 +6,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.UndoableEditEvent;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.*;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -15,6 +14,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
 
 public class DiffPanel extends JPanel {
     private final JTextPane editor = new JTextPane(new DefaultStyledDocument());
@@ -116,10 +117,42 @@ public class DiffPanel extends JPanel {
                 int result = fileChooser.showOpenDialog(DiffPanel.this);
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
-                    FileReader reader = new FileReader(selectedFile);
-                    BufferedReader bufferedReader = new BufferedReader(reader);
-                    editor.setText(readAllLines(bufferedReader));
-                    fileName.setText(selectedFile.getAbsolutePath());
+                    List<String> lines = Files.readAllLines(selectedFile.toPath());
+
+                    ProgressMonitor progressMonitor = new ProgressMonitor(DiffPanel.this,
+                            "Opening file: " + selectedFile.getAbsolutePath(), "aba", 0, lines.size());
+                    progressMonitor.setProgress(0);
+                    progressMonitor.setMillisToPopup(100);
+
+                    Thread thread = new Thread(() -> {
+                        StyledDocument document = editor.getStyledDocument();
+                        for (int i = 0, n = lines.size() / 512; i <= n; ++i) {
+                            final int curIteration = i;
+                            fileName.setText(selectedFile.getAbsolutePath());
+                            int m = Math.min(lines.size(), (curIteration + 1) * 512);
+                            StringBuilder builder = new StringBuilder();
+                            for (int j = curIteration * 512; j < m; ++j) {
+                                builder.append(lines.get(j));
+                                builder.append(System.lineSeparator());
+                            }
+
+                            SwingUtilities.invokeLater(() -> {
+                                try {
+                                    if (progressMonitor.isCanceled())
+                                        return;
+                                    document.insertString(document.getLength(),
+                                            builder.toString(), null);
+                                    progressMonitor.setNote(String.format("%d / %d", (curIteration + 1) * 512, lines.size()));
+                                    progressMonitor.setProgress((curIteration + 1) * 512);
+                                } catch (BadLocationException e1) {
+                                    e1.printStackTrace();
+                                }
+                            });
+                        }
+                    });
+
+                    thread.start();
+
 
                 }
             } catch (IOException ioe) {
