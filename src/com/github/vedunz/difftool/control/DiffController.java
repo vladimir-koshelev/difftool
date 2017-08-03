@@ -6,7 +6,9 @@ import com.github.vedunz.difftool.diff.DiffService;
 import com.github.vedunz.difftool.ui.VersionManager;
 
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -15,15 +17,21 @@ import java.util.concurrent.Executors;
  */
 public class DiffController {
 
-    private final DiffConsumerList diffConsumerList;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final DiffService diffService = DiffService.createDefaultDiffService();
     private final VersionManager versionManager;
+    private final List<DiffConsumer> diffConsumerList = new ArrayList<>();
 
-
-    public DiffController(VersionManager versionManager, DiffConsumerList diffConsumerList) {
-        this.diffConsumerList = diffConsumerList;
+    public DiffController(VersionManager versionManager) {
         this.versionManager = versionManager;
+    }
+
+    public void addDiffConsumer(DiffConsumer diffConsumer) {
+        diffConsumerList.add(diffConsumer);
+    }
+
+    public void removeDiffConsumer(DiffConsumer diffConsumer) {
+        diffConsumerList.remove(diffConsumer);
     }
 
     public void uploadFirstText(Collection<String> text) {
@@ -40,11 +48,16 @@ public class DiffController {
             DiffResult results = diffService.getDiffResult();
             SwingUtilities.invokeLater(() -> {
                 if (currentVersion == versionManager.getVersion()) {
-                    diffConsumerList.update(results);
+                    for (DiffConsumer diffConsumer : diffConsumerList)
+                        diffConsumer.updateDiffResult(results);
                 }
             });
         });
     }
 
 
+    public void invalidate() {
+        for (DiffConsumer diffConsumer : diffConsumerList)
+            diffConsumer.updateDiffResult(null);
+    }
 }

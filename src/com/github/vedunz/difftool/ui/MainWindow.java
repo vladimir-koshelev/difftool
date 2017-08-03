@@ -5,21 +5,10 @@ import com.github.vedunz.difftool.control.DiffController;
 import com.github.vedunz.difftool.control.LineDiffConsumerList;
 import com.github.vedunz.difftool.control.LineDiffController;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.UndoableEditEvent;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.undo.UndoManager;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,17 +21,16 @@ public final class MainWindow extends JFrame {
     private final DiffPanel secondDiffPanel = new DiffPanel();
 
     private final VersionManager versionManager = new VersionManager();
-    private final LineDiffConsumerList lineDiffConsumerList = new LineDiffConsumerList();
 
-    private final LineDiffController lineDiffController = new LineDiffController(versionManager, lineDiffConsumerList);
+    private final LineDiffController lineDiffController = new LineDiffController(versionManager);
     private final HighlightManager mainWindowHighlightManager = new HighlightManager(firstDiffPanel, secondDiffPanel, lineDiffController);
 
     private final ScrollManager scrollManager = new ScrollManager(firstDiffPanel, secondDiffPanel);
 
     private final DiffNavigationManager firstDiffNavigationManager = new DiffNavigationManager(firstDiffPanel, true);
     private final DiffNavigationManager secondDiffNavigationManager = new DiffNavigationManager(secondDiffPanel, false);
-    private final DiffConsumerList diffConsumerList = new DiffConsumerList();
-    private final DiffController controller = new DiffController(versionManager, diffConsumerList);
+
+    private final DiffController controller = new DiffController(versionManager);
 
     private final DocumentListener documentListener = new DocumentListener() {
 
@@ -63,7 +51,7 @@ public final class MainWindow extends JFrame {
 
         private void processUpdate(DocumentEvent e) {
             versionManager.textUpdated();
-            diffConsumerList.update(null);
+            controller.invalidate();
             if (e.getDocument() == firstDiffPanel.getEditor().getDocument()) {
                 List<String> lines = Arrays.asList(firstDiffPanel.getEditor().getText().split("\\r?\\n"));
                 controller.uploadFirstText(lines);
@@ -84,12 +72,12 @@ public final class MainWindow extends JFrame {
         add(firstDiffPanel);
         add(secondDiffPanel);
 
-        lineDiffConsumerList.add(mainWindowHighlightManager);
+        lineDiffController.addLineDiffConsumer(mainWindowHighlightManager);
 
-        diffConsumerList.add(mainWindowHighlightManager);
-        diffConsumerList.add(scrollManager);
-        diffConsumerList.add(firstDiffNavigationManager);
-        diffConsumerList.add(secondDiffNavigationManager);
+        controller.addDiffConsumer(mainWindowHighlightManager);
+        controller.addDiffConsumer(scrollManager);
+        controller.addDiffConsumer(firstDiffNavigationManager);
+        controller.addDiffConsumer(secondDiffNavigationManager);
 
         firstDiffPanel.getEditor().getStyledDocument().addDocumentListener(documentListener);
         secondDiffPanel.getEditor().getStyledDocument().addDocumentListener(documentListener);

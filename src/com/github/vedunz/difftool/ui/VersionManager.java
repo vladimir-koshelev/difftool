@@ -1,5 +1,6 @@
 package com.github.vedunz.difftool.ui;
 
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -8,21 +9,14 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class VersionManager {
 
-    private final Lock lock = new ReentrantLock();
-
-    private volatile long version = 0;
+    private final AtomicLong version = new AtomicLong(0);
 
     public void textUpdated() {
-        lock.lock();
-        version++;
-        lock.unlock();
+        version.incrementAndGet();
     }
 
     public long getVersion() {
-        lock.lock();
-        long value = version;
-        lock.unlock();
-        return value;
+        return version.get();
     }
 
 }

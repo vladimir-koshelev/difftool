@@ -8,23 +8,23 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Element;
 import javax.swing.text.Style;
 import javax.swing.text.StyleContext;
-import javax.xml.soap.Text;
 import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.text.AttributedString;
 
 public class LinePanel extends JPanel {
 
+    private static final int VERTICAL_PADDING = -3;
     private final JTextPane textPane;
     private final JViewport viewport;
     private final StyleContext styleContext = StyleManager.getStyleContext();
     private final FontMetrics fontMetrics;
 
     private BackgroundColorProvider colorProvider = null;
-    private int minWidth = 0;
+    private int currentWidth = 0;
+    private int numOfSymbols = 0;
 
 
     public LinePanel(JTextPane textPane, JViewport viewport) {
@@ -34,17 +34,38 @@ public class LinePanel extends JPanel {
         Font font = styleContext.getFont(mainStyle);
         setFont(font);
         fontMetrics = getFontMetrics(font);
-        minWidth = fontMetrics.charWidth(' ') * 7;
-        setMinimumSize(new Dimension(minWidth, 0));
+        adjustWidth();
 
-        viewport.addChangeListener(e -> {
-            LinePanel.this.repaint();
+        viewport.addChangeListener( e -> { revalidate(); repaint();});
+
+        textPane.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(final DocumentEvent e) {
+                adjustWidth();
+                revalidate();
+                repaint();
+
+            }
+
+            @Override
+            public void removeUpdate(final DocumentEvent e) {
+                adjustWidth();
+                revalidate();
+                repaint();
+            }
+
+            @Override
+            public void changedUpdate(final DocumentEvent e) {
+                adjustWidth();
+                revalidate();
+                repaint();
+            }
         });
     }
 
     @Override
     public Dimension getMinimumSize() {
-        return new Dimension(minWidth, 0);
+        return new Dimension(currentWidth, 0);
     }
 
     public void setColorProvider(final BackgroundColorProvider colorProvider) {
@@ -60,29 +81,63 @@ public class LinePanel extends JPanel {
             int startyViewport = viewport.getViewPosition().y;
             int aligny = fontMetrics.getHeight() - (startyViewport - starty);
 
+
+            Graphics2D g2d = (Graphics2D) g;
+
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
             for (int i = interval.getStart(); i <= interval.getEnd(); ++i) {
                 int y = fontMetrics.getHeight() * (i - interval.getStart());
 
                 String lineMessage = String.valueOf(i + 1) + " ";
-                while (lineMessage.length() < 7)
+
+                while (lineMessage.length() < numOfSymbols)
                     lineMessage = " " + lineMessage;
-                int alignx =  minWidth - fontMetrics.stringWidth(lineMessage);
+
+                int alignx = currentWidth - fontMetrics.stringWidth(lineMessage);
 
                 AttributedString stringToDisplay = new AttributedString(lineMessage);
                 final StyleContext styleContext = StyleManager.getStyleContext();
                 final Style style = styleContext.getStyle(StyleManager.MAIN_STYLE_NAME);
-                stringToDisplay.addAttribute(TextAttribute.FONT, styleContext.getFont(style));
+                final Font font = styleContext.getFont(style);
+                stringToDisplay.addAttribute(TextAttribute.FONT, font);
+                Color color = null;
                 if (colorProvider != null) {
-                    final Color color = colorProvider.getColorForLine(i);
+                    color = colorProvider.getColorForLine(i);
                     stringToDisplay.addAttribute(TextAttribute.BACKGROUND, color);
                 }
 
-                g.drawString(stringToDisplay.getIterator(), alignx, aligny + y);
+                if (color != null) {
+                    Color oldColor = g2d.getColor();
+                    g2d.setColor(color);
+                    g2d.fillRect(0, aligny + y + VERTICAL_PADDING - fontMetrics.getAscent(),
+                            currentWidth, fontMetrics.getHeight());
+                    g2d.setColor(oldColor);
+                }
+
+
+                g.drawString(stringToDisplay.getIterator(), alignx, aligny + y + VERTICAL_PADDING);
             }
 
         } catch (BadLocationException e) {
             e.printStackTrace();
         }
 
+    }
+
+    private int getNumberOfDigitsForLineNo() {
+        int lines = textPane.getDocument().getDefaultRootElement().getElementCount();
+        int ret = 0;
+        while (lines > 0) {
+            ret++;
+            lines /= 10;
+        }
+        return ret;
+    }
+
+    private void adjustWidth() {
+        numOfSymbols = getNumberOfDigitsForLineNo() + 2;
+        currentWidth = fontMetrics.charWidth(' ') * (numOfSymbols);
+        setPreferredSize(new Dimension(currentWidth, getHeight()));
     }
 }

@@ -79,8 +79,6 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
             firstLineColorCache.clear();
             secondLineColorCache.clear();
             calculateLinesForDiff(diffResult);
-            firstLinePanel.repaint();
-            secondLinePanel.repaint();
         } else {
             firstLines2secondLines.clear();
             secondLines2firstLines.clear();
@@ -154,11 +152,22 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
                 lineDiffController.requestDiff(getLineText(firstEditor, firstLine),
                         getLineText(secondEditor, secondLine), firstLine, secondLine);
                 removeFromLinesForLineDiff(firstLine, secondLine);
+                Style style = styleContext.getStyle(StyleManager.ADDED_STYLE_NAME);
+                secondLineColorCache.put(secondLine, styleContext.getBackground(style));
             } else if (!linesWithInLineDiffSecond.contains(secondLine)) {
-                if (diffResult.isLineInSame(secondLine, false))
-                    changeStyleForLine(secondEditor, secondLine, styleContext.getStyle(StyleManager.MAIN_STYLE_NAME));
-                else
-                    changeStyleForLine(secondEditor, secondLine, styleContext.getStyle(StyleManager.ADDED_STYLE_NAME));
+                if (diffResult.isLineInSame(secondLine, false)) {
+                    Style style = styleContext.getStyle(StyleManager.MAIN_STYLE_NAME);
+                    changeStyleForLine(secondEditor, secondLine, style);
+                    secondLineColorCache.put(secondLine, styleContext.getBackground(style));
+                }
+                else {
+                    Style style = styleContext.getStyle(StyleManager.ADDED_STYLE_NAME);
+                    changeStyleForLine(secondEditor, secondLine, style);
+                    secondLineColorCache.put(secondLine, styleContext.getBackground(style));
+                }
+            } else {
+                Style style = styleContext.getStyle(StyleManager.ADDED_STYLE_NAME);
+                secondLineColorCache.put(secondLine, styleContext.getBackground(style));
             }
         }
     }
@@ -171,11 +180,22 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
                 lineDiffController.requestDiff(getLineText(firstEditor, firstLine),
                         getLineText(secondEditor, secondLine), firstLine, secondLine);
                 removeFromLinesForLineDiff(firstLine, secondLine);
+                Style style = styleContext.getStyle(StyleManager.REMOVED_STYLE_NAME);
+                firstLineColorCache.put(firstLine, styleContext.getBackground(style));
             } else if (!linesWithInLineDiffFirst.contains(firstLine)){
-                if (diffResult.isLineInSame(firstLine, true))
-                    changeStyleForLine(firstEditor, firstLine, styleContext.getStyle(StyleManager.MAIN_STYLE_NAME));
-                else
-                    changeStyleForLine(firstEditor, firstLine, styleContext.getStyle(StyleManager.REMOVED_STYLE_NAME));
+                if (diffResult.isLineInSame(firstLine, true)) {
+                    Style style = styleContext.getStyle(StyleManager.MAIN_STYLE_NAME);
+                    changeStyleForLine(firstEditor, firstLine, style);
+                    firstLineColorCache.put(firstLine, styleContext.getBackground(style));
+                }
+                else {
+                    Style style = styleContext.getStyle(StyleManager.REMOVED_STYLE_NAME);
+                    changeStyleForLine(firstEditor, firstLine, style);
+                    firstLineColorCache.put(firstLine, styleContext.getBackground(style));
+                }
+            } else {
+                Style style = styleContext.getStyle(StyleManager.REMOVED_STYLE_NAME);
+                firstLineColorCache.put(firstLine, styleContext.getBackground(style));
             }
         }
     }

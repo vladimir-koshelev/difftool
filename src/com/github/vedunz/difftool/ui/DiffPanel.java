@@ -132,7 +132,7 @@ public class DiffPanel extends JPanel {
 
     private void loadButtonImages() {
         try {
-            Image img = ImageIO.read(Thread.currentThread().getContextClassLoader().getResource("images/document-open.png"));
+            Image img = ImageIO.read(ClassLoader.getSystemResourceAsStream("images/document-open.png"));
             openButton.setToolTipText("Open first file");
             openButton.setIcon(new ImageIcon(img));
         } catch (Exception ex) {
@@ -140,7 +140,7 @@ public class DiffPanel extends JPanel {
         }
 
         try {
-            Image img = ImageIO.read(Thread.currentThread().getContextClassLoader().getResource("images/go-next.png"));
+            Image img = ImageIO.read(ClassLoader.getSystemResourceAsStream("images/go-next.png"));
             nextDiffButton.setToolTipText("Next diff");
             nextDiffButton.setIcon(new ImageIcon(img));
         } catch (Exception ex) {
@@ -148,7 +148,7 @@ public class DiffPanel extends JPanel {
         }
 
         try {
-            Image img = ImageIO.read(Thread.currentThread().getContextClassLoader().getResource("images/go-previous.png"));
+            Image img = ImageIO.read(ClassLoader.getSystemResourceAsStream("images/go-previous.png"));
             prevDiffButton.setIcon(new ImageIcon(img));
             prevDiffButton.setToolTipText("Previous diff");
         } catch (Exception ex) {
@@ -179,6 +179,9 @@ public class DiffPanel extends JPanel {
         gbc.weightx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
+       /* JScrollPane panelForFileName = new JScrollPane(fileName);
+        panelForFileName.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        panelForFileName.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);*/
         add(fileName, gbc);
 
         JPanel tempEditorPanel = new JPanel(new BorderLayout());
@@ -189,19 +192,11 @@ public class DiffPanel extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.weighty = 1;
-        gbc.weightx = 0;
-        gbc.gridwidth = 1;
-        gbc.fill = GridBagConstraints.VERTICAL;
-
-        editorPanel.add(linePanel, gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.weighty = 1;
         gbc.weightx = 1;
         gbc.gridwidth = 6;
         gbc.fill = GridBagConstraints.BOTH;
 
+        scrollPane.setRowHeaderView(linePanel);
 
         editorPanel.add(scrollPane, gbc);
 
