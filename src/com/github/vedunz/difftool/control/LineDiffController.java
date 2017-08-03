@@ -35,6 +35,8 @@ public class LineDiffController {
     public void requestDiff(String firstLine, String secondLine, int firstLineNo, int secondLineNo) {
         long currentVersion = versionManager.getVersion();
         executorService.submit(() -> {
+            if (currentVersion != versionManager.getVersion())
+                return;
             DiffResult results = diffService.getDiffResult(firstLine, secondLine);
             SwingUtilities.invokeLater(() -> {
                 if (currentVersion == versionManager.getVersion()) {
