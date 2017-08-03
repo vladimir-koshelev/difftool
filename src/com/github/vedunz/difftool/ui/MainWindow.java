@@ -1,8 +1,6 @@
 package com.github.vedunz.difftool.ui;
 
-import com.github.vedunz.difftool.control.DiffConsumerList;
 import com.github.vedunz.difftool.control.DiffController;
-import com.github.vedunz.difftool.control.LineDiffConsumerList;
 import com.github.vedunz.difftool.control.LineDiffController;
 
 import javax.swing.*;
@@ -50,12 +48,13 @@ public final class MainWindow extends JFrame {
         }
 
         private void processUpdate(DocumentEvent e) {
-            versionManager.textUpdated();
             controller.invalidate();
             if (e.getDocument() == firstDiffPanel.getEditor().getDocument()) {
+                versionManager.firstTextUpdated();
                 List<String> lines = Arrays.asList(firstDiffPanel.getEditor().getText().split("\\r?\\n"));
                 controller.uploadFirstText(lines);
             } else {
+                versionManager.secondTextUpdated();
                 List<String> lines = Arrays.asList(secondDiffPanel.getEditor().getText().split("\\r?\\n"));
                 controller.uploadSecondText(lines);
             }

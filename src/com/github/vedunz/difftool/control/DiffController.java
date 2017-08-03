@@ -35,23 +35,33 @@ public class DiffController {
     }
 
     public void uploadFirstText(Collection<String> text) {
-        executorService.submit(() -> diffService.uploadFirstText(text));
+        long firstVersion = versionManager.getFirstVersion();
+        executorService.submit(() -> {
+            if (firstVersion == versionManager.getFirstVersion())
+                diffService.uploadFirstText(text);
+        });
     }
 
     public void uploadSecondText(Collection<String> text) {
-        executorService.submit(() -> diffService.uploadSecondText(text));
+        long secondVersion = versionManager.getSecondVersion();
+        executorService.submit(() -> {
+            if (secondVersion == versionManager.getSecondVersion())
+                diffService.uploadSecondText(text);
+        } );
     }
 
     public void requestDiff() {
         long currentVersion = versionManager.getVersion();
         executorService.submit(() -> {
-            DiffResult results = diffService.getDiffResult();
-            SwingUtilities.invokeLater(() -> {
-                if (currentVersion == versionManager.getVersion()) {
-                    for (DiffConsumer diffConsumer : diffConsumerList)
-                        diffConsumer.updateDiffResult(results);
-                }
-            });
+            if (currentVersion == versionManager.getVersion()) {
+                DiffResult results = diffService.getDiffResult();
+                SwingUtilities.invokeLater(() -> {
+                    if (currentVersion == versionManager.getVersion()) {
+                        for (DiffConsumer diffConsumer : diffConsumerList)
+                            diffConsumer.updateDiffResult(results);
+                    }
+                });
+            }
         });
     }
 
