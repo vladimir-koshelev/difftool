@@ -2,6 +2,8 @@ package com.github.vedunz.difftool.ui;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.text.AbstractDocument;
@@ -197,6 +199,22 @@ public class DiffPanel extends JPanel {
         gbc.fill = GridBagConstraints.BOTH;
 
         scrollPane.setRowHeaderView(linePanel);
+        final JViewport parent = (JViewport) linePanel.getParent();
+        parent.addChangeListener(new ChangeListener() {
+            private  boolean isChanged = false;
+            @Override
+            public void stateChanged(final ChangeEvent e) {
+                try {
+                    if (!isChanged) {
+                        isChanged = true;
+                        parent.setViewPosition(new Point(0,0));
+                    }
+                } finally {
+                    isChanged = false;
+                }
+
+            }
+        });
 
         editorPanel.add(scrollPane, gbc);
 
