@@ -1,5 +1,7 @@
 package com.github.vedunz.difftool.ui;
 
+import com.github.vedunz.difftool.ui.util.StyleManager;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -31,6 +33,8 @@ public class DiffPanel extends JPanel {
 
     public DiffPanel() {
         fileName.setEditable(false);
+        final StyleContext styleContext = StyleManager.getStyleContext();
+        editor.setFont(styleContext.getFont(styleContext.getStyle(StyleManager.MAIN_STYLE_NAME)));
         setLayout(new GridBagLayout());
         linePanel = new LinePanel(editor, scrollPane.getViewport());
         loadButtonImages();
@@ -262,9 +266,6 @@ public class DiffPanel extends JPanel {
         gbc.fill = GridBagConstraints.BOTH;
 
         add(tempEditorPanel, gbc);
-
-
-
     }
 
     private class IgnoreChangeUndoManager extends UndoManager {
