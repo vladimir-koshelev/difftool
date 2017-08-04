@@ -219,9 +219,6 @@ public class DiffPanel extends JPanel {
         gbc.weightx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-       /* JScrollPane panelForFileName = new JScrollPane(fileName);
-        panelForFileName.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-        panelForFileName.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);*/
         add(fileName, gbc);
 
         JPanel tempEditorPanel = new JPanel(new BorderLayout());

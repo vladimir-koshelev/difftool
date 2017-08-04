@@ -26,8 +26,6 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
     private final JTextPane secondEditor;
     private final JScrollPane firstScrollPane;
     private final JScrollPane secondScrollPane;
-    private final LinePanel firstLinePanel;
-    private final LinePanel secondLinePanel;
     private final StyleContext styleContext = StyleManager.getStyleContext();
     private DiffResult diffResult;
     private final LineDiffController lineDiffController;
@@ -48,8 +46,6 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
         this.secondEditor = secondDiffPanel.getEditor();
         this.firstScrollPane = firstDiffPanel.getScrollPane();
         this.secondScrollPane = secondDiffPanel.getScrollPane();
-        this.firstLinePanel = firstDiffPanel.getLinePanel();
-        this.secondLinePanel = secondDiffPanel.getLinePanel();
         this.lineDiffController = lineDiffController;
         final ChangeListener changeListener = e -> {
             try {
