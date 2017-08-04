@@ -136,8 +136,16 @@ public class LinePanel extends JPanel {
     }
 
     private void adjustWidth() {
+        JComponent component = (JComponent) getParent();
+        int height = getHeight();
+        if (component != null)
+        {
+            JScrollPane scrollPane = (JScrollPane) component.getParent();
+            height = scrollPane.getViewport().getViewRect().height;
+        }
+
         numOfSymbols = getNumberOfDigitsForLineNo() + 2;
         currentWidth = fontMetrics.charWidth(' ') * (numOfSymbols);
-        setPreferredSize(new Dimension(currentWidth, getHeight()));
+        setPreferredSize(new Dimension(currentWidth, height));
     }
 }
