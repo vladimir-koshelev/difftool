@@ -12,9 +12,7 @@ import javax.swing.text.*;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
@@ -41,6 +39,7 @@ public class DiffPanel extends JPanel {
         addOpenFileDialog();
         addUndoRedoActions();
         setupLayout();
+        setupLinePanel();
         scrollPane.getVerticalScrollBar().setUnitIncrement(32);
     }
 
@@ -77,15 +76,6 @@ public class DiffPanel extends JPanel {
     }
 
     public LinePanel getLinePanel() { return linePanel; }
-
-    private static String readAllLines(BufferedReader buffIn) throws IOException {
-        StringBuilder allLines = new StringBuilder();
-        String line;
-        while ((line = buffIn.readLine()) != null) {
-            allLines.append(line + System.lineSeparator());
-        }
-        return allLines.toString();
-    }
 
     private void addUndoRedoActions() {
         editor.getDocument().addUndoableEditListener(undoManager);
@@ -146,7 +136,6 @@ public class DiffPanel extends JPanel {
     }
 
     private void runUploadFileInEWT(final File selectedFile, final List<String> lines, final ProgressMonitor progressMonitor, final StyledDocument document, final int i) {
-        final int curIteration = i;
         if (i * 512 >= lines.size()) {
             ((DefaultCaret)editor.getCaret()).setUpdatePolicy(DefaultCaret.UPDATE_WHEN_ON_EDT);
             return;
@@ -157,17 +146,17 @@ public class DiffPanel extends JPanel {
             return;
         }
         fileName.setText(selectedFile.getAbsolutePath());
-        int m = Math.min(lines.size(), (curIteration + 1) * 512);
+        int m = Math.min(lines.size(), (i + 1) * 512);
         StringBuilder builder = new StringBuilder();
-        for (int j = curIteration * 512; j < m; ++j) {
+        for (int j = i * 512; j < m; ++j) {
             builder.append(lines.get(j));
             builder.append(System.lineSeparator());
         }
         try {
             document.insertString(document.getLength(),
                     builder.toString(), null);
-            progressMonitor.setNote(String.format("%d / %d", (curIteration + 1) * 512, lines.size()));
-            progressMonitor.setProgress((curIteration + 1) * 512);
+            progressMonitor.setNote(String.format("%d / %d", (i + 1) * 512, lines.size()));
+            progressMonitor.setProgress((i + 1) * 512);
         } catch (BadLocationException e1) {
             e1.printStackTrace();
         }
@@ -210,6 +199,7 @@ public class DiffPanel extends JPanel {
         gbc.gridwidth = 2;
         gbc.weightx = 0;
         gbc.weighty = 0;
+        gbc.insets = new Insets(1,1, 1, 1);
         gbc.fill = GridBagConstraints.NONE;
 
         add(openButton, gbc);
@@ -225,18 +215,18 @@ public class DiffPanel extends JPanel {
 
         add(fileName, gbc);
 
-        JPanel tempEditorPanel = new JPanel(new BorderLayout());
-        JPanel editorPanel = new JPanel();
-        tempEditorPanel.add(editorPanel, BorderLayout.CENTER);
-        editorPanel.setLayout(new GridBagLayout());
 
         gbc.gridx = 0;
-        gbc.gridy = 0;
+        gbc.gridy = 1;
         gbc.weighty = 1;
         gbc.weightx = 1;
         gbc.gridwidth = 6;
         gbc.fill = GridBagConstraints.BOTH;
 
+        add(scrollPane, gbc);
+    }
+
+    private void setupLinePanel() {
         scrollPane.setRowHeaderView(linePanel);
         final JViewport parent = (JViewport) linePanel.getParent();
         parent.addChangeListener(new ChangeListener() {
@@ -254,18 +244,6 @@ public class DiffPanel extends JPanel {
 
             }
         });
-
-        editorPanel.add(scrollPane, gbc);
-
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.weighty = 1;
-        gbc.weightx = 1;
-        gbc.gridwidth = 6;
-        gbc.fill = GridBagConstraints.BOTH;
-
-        add(tempEditorPanel, gbc);
     }
 
     private class IgnoreChangeUndoManager extends UndoManager {

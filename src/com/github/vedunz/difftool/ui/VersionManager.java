@@ -1,8 +1,7 @@
 package com.github.vedunz.difftool.ui;
 
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+
 
 /**
  * Created by vedun on 24.07.2017.

@@ -9,8 +9,8 @@ import java.util.List;
  */
 public class MyersDiffService extends MyersDiffServiceCommon implements DiffService {
 
-    List<String> firstText = new ArrayList<>();
-    List<String> secondText = new ArrayList<>();
+    private final List<String> firstText = new ArrayList<>();
+    private final List<String> secondText = new ArrayList<>();
 
 
     @Override
