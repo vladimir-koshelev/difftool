@@ -119,6 +119,8 @@ public class DiffPanel extends JPanel {
                     File selectedFile = fileChooser.getSelectedFile();
                     List<String> lines = Files.readAllLines(selectedFile.toPath());
                     editor.setText("");
+                    DefaultCaret defaultCaret = (DefaultCaret) editor.getCaret();
+                    defaultCaret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
 
                     ProgressMonitor progressMonitor = new ProgressMonitor(DiffPanel.this,
                             "Opening file: " + selectedFile.getAbsolutePath(), "", 0, lines.size());
@@ -141,10 +143,13 @@ public class DiffPanel extends JPanel {
 
     private void runUploadFileInEWT(final File selectedFile, final List<String> lines, final ProgressMonitor progressMonitor, final StyledDocument document, final int i) {
         final int curIteration = i;
-        if (i * 512 >= lines.size())
+        if (i * 512 >= lines.size()) {
+            ((DefaultCaret)editor.getCaret()).setUpdatePolicy(DefaultCaret.UPDATE_WHEN_ON_EDT);
             return;
+        }
         if (progressMonitor.isCanceled()) {
             editor.setText("");
+            ((DefaultCaret)editor.getCaret()).setUpdatePolicy(DefaultCaret.UPDATE_WHEN_ON_EDT);
             return;
         }
         fileName.setText(selectedFile.getAbsolutePath());
