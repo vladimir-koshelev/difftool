@@ -12,6 +12,7 @@ import javax.swing.text.*;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -164,26 +165,18 @@ public class DiffPanel extends JPanel {
     }
 
     private void loadButtonImages() {
-        try {
-            Image img = ImageIO.read(ClassLoader.getSystemResourceAsStream("images/document-open.png"));
-            openButton.setToolTipText("Open first file");
-            openButton.setIcon(new ImageIcon(img));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        openButton.setToolTipText("Open file");
+        nextDiffButton.setToolTipText("Go to next diff");
+        prevDiffButton.setToolTipText("Go to previous diff");
+        loadButtonImage(openButton, "images/document-open.png");
+        loadButtonImage(nextDiffButton, "images/go-next.png");
+        loadButtonImage(prevDiffButton, "images/go-previous.png");
+    }
 
+    private void loadButtonImage(JButton button, String pathToImage) {
         try {
-            Image img = ImageIO.read(ClassLoader.getSystemResourceAsStream("images/go-next.png"));
-            nextDiffButton.setToolTipText("Next diff");
-            nextDiffButton.setIcon(new ImageIcon(img));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        try {
-            Image img = ImageIO.read(ClassLoader.getSystemResourceAsStream("images/go-previous.png"));
-            prevDiffButton.setIcon(new ImageIcon(img));
-            prevDiffButton.setToolTipText("Previous diff");
+            BufferedImage img = ImageIO.read(ClassLoader.getSystemResourceAsStream(pathToImage));
+            button.setIcon(new ImageIcon(img));
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -199,7 +192,7 @@ public class DiffPanel extends JPanel {
         gbc.gridwidth = 2;
         gbc.weightx = 0;
         gbc.weighty = 0;
-        gbc.insets = new Insets(1,1, 1, 1);
+        gbc.insets = new Insets(2,2, 2, 2);
         gbc.fill = GridBagConstraints.NONE;
 
         add(openButton, gbc);
