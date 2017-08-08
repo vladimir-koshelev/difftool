@@ -28,6 +28,7 @@ public class DiffPanel extends JPanel {
     private final UndoManager undoManager = new IgnoreChangeUndoManager();
     private final JTextArea fileName = new JTextArea(1, 20);
     private final LinePanel linePanel;
+    private boolean isOpenFileOperation = false;
 
 
     public DiffPanel() {
@@ -107,6 +108,8 @@ public class DiffPanel extends JPanel {
 
     private void addOpenFileDialog() {
         openButton.addActionListener( (e) -> {
+            if (isOpenFileOperation)
+                return;
             JFileChooser fileChooser = new JFileChooser(System.getProperty("user.dir"));
             try {
                 int result = fileChooser.showOpenDialog(DiffPanel.this);
@@ -114,8 +117,7 @@ public class DiffPanel extends JPanel {
                     File selectedFile = fileChooser.getSelectedFile();
                     List<String> lines = Files.readAllLines(selectedFile.toPath());
                     editor.setText("");
-                    DefaultCaret defaultCaret = (DefaultCaret) editor.getCaret();
-                    defaultCaret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+                    enterOpenFileMode();
 
                     ProgressMonitor progressMonitor = new ProgressMonitor(DiffPanel.this,
                             "Opening file: " + selectedFile.getAbsolutePath(), "", 0, lines.size());
@@ -131,19 +133,22 @@ public class DiffPanel extends JPanel {
                         ioe.toString(),
                         "Cannot open file",
                         JOptionPane.ERROR_MESSAGE);
+                exitOpenFileMode();
             }
+
         }
         );
     }
 
     private void runUploadFileInEWT(final File selectedFile, final List<String> lines, final ProgressMonitor progressMonitor, final StyledDocument document, final int i) {
+
         if (i * 512 >= lines.size()) {
-            ((DefaultCaret)editor.getCaret()).setUpdatePolicy(DefaultCaret.UPDATE_WHEN_ON_EDT);
+            exitOpenFileMode();
             return;
         }
         if (progressMonitor.isCanceled()) {
             editor.setText("");
-            ((DefaultCaret)editor.getCaret()).setUpdatePolicy(DefaultCaret.UPDATE_WHEN_ON_EDT);
+            exitOpenFileMode();
             return;
         }
         fileName.setText(selectedFile.getAbsolutePath());
@@ -162,6 +167,17 @@ public class DiffPanel extends JPanel {
             e1.printStackTrace();
         }
         SwingUtilities.invokeLater( () -> runUploadFileInEWT(selectedFile, lines, progressMonitor, document, i + 1));
+    }
+
+    private void enterOpenFileMode() {
+        DefaultCaret defaultCaret = (DefaultCaret) editor.getCaret();
+        defaultCaret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+        isOpenFileOperation = true;
+    }
+
+    private void exitOpenFileMode() {
+        ((DefaultCaret)editor.getCaret()).setUpdatePolicy(DefaultCaret.UPDATE_WHEN_ON_EDT);
+        isOpenFileOperation = false;
     }
 
     private void loadButtonImages() {
