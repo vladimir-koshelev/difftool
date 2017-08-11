@@ -10,20 +10,11 @@ public class VersionManager {
 
     private final AtomicLong version = new AtomicLong(0);
 
-    private final AtomicLong firstVersion = new AtomicLong(0);
-    private final AtomicLong secondVersion = new AtomicLong(0);
-
     public long getVersion() {
         return version.get();
     }
 
-    public void firstTextUpdated() { firstVersion.incrementAndGet(); textUpdated();}
-    public void secondTextUpdated() { secondVersion.incrementAndGet(); textUpdated();}
-
-    public long getFirstVersion() {return firstVersion.get();}
-    public long getSecondVersion() {return secondVersion.get();}
-
-    private void textUpdated() {
+    public void textUpdated() {
         version.incrementAndGet();
     }
 }

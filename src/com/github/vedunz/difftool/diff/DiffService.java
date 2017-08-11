@@ -2,7 +2,7 @@ package com.github.vedunz.difftool.diff;
 
 import com.sun.istack.internal.NotNull;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by vedun on 23.07.2017.
@@ -12,9 +12,21 @@ public interface DiffService {
         return new MyersDiffService();
     }
 
-    void uploadFirstText(@NotNull Collection<String> lines);
+    void insertFirstLines(int offset, @NotNull List<String> lines);
 
-    void uploadSecondText(@NotNull Collection<String> lines);
+    void removeFirstLines(int offset, int length);
+
+    void insertSecondLines(int offset, @NotNull List<String> lines);
+
+    void removeSecondLines(int offset, int lenght);
+
+    void replaceLineFirst(int offset, String newValue);
+
+    void replaceLineSecond(int offset, String newValue);
 
     DiffResult getDiffResult();
+
+    String getFirstText();
+
+    String getSecondText();
 }

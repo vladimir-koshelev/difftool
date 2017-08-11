@@ -8,8 +8,8 @@ import java.util.List;
 /**
  * Created by vedun on 26.07.2017.
  */
-public abstract class MyersDiffServiceCommon {
-    protected <T> DiffResult getDiffResult(List<T> firstList, List<T> secondList) {
+public class MyersDiffServiceCommon {
+    public static <T> DiffResult getDiffResult(List<T> firstList, List<T> secondList) {
         DiffComparator<T> diffComparator = new DiffComparator<>(firstList, secondList);
         EditScript<T> script = diffComparator.getScript();
         List<DiffInterval> diffIntervals = new ArrayList<>();

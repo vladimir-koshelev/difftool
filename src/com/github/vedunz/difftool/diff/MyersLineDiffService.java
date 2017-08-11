@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Created by vedun on 26.07.2017.
  */
-public class MyersLineDiffService extends MyersDiffServiceCommon implements LineDiffService {
+public class MyersLineDiffService implements LineDiffService {
     private final List<Character> firstChars = new ArrayList<>();
     private final List<Character> secondChars = new ArrayList<>();
 
@@ -21,6 +21,6 @@ public class MyersLineDiffService extends MyersDiffServiceCommon implements Line
         for (char c : secondLine.toCharArray()) {
             secondChars.add(c);
         }
-        return getDiffResult(firstChars, secondChars);
+        return MyersDiffServiceCommon.getDiffResult(firstChars, secondChars);
     }
 }

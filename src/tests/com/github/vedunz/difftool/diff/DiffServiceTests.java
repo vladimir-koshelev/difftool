@@ -35,8 +35,8 @@ class DiffServiceTests {
         secondText.addAll(PATTERN1);
         secondText.addAll(PATTERN2);
         DiffService diffService = new NaiveDiffService();
-        diffService.uploadFirstText(firstText);
-        diffService.uploadSecondText(secondText);
+        diffService.insertFirstLines(0, firstText);
+        diffService.insertSecondLines(0, secondText);
         DiffResult result = diffService.getDiffResult();
         int totalLength = 0;
         for (DiffInterval interval : result.getIntervals()) {
@@ -56,8 +56,8 @@ class DiffServiceTests {
         secondText.addAll(PATTERN1);
         secondText.addAll(PATTERN2);
         DiffService diffService = new MyersDiffService();
-        diffService.uploadFirstText(firstText);
-        diffService.uploadSecondText(secondText);
+        diffService.insertFirstLines(0, firstText);
+        diffService.insertSecondLines(0, secondText);
         DiffResult result = diffService.getDiffResult();
         int totalLength = 0;
         for (DiffInterval interval : result.getIntervals()) {

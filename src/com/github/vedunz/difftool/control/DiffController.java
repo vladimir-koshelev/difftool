@@ -7,10 +7,13 @@ import com.github.vedunz.difftool.ui.VersionManager;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Created by vedun on 22.07.2017.
@@ -34,20 +37,48 @@ public class DiffController {
         diffConsumerList.remove(diffConsumer);
     }
 
-    public void uploadFirstText(Collection<String> text) {
-        long firstVersion = versionManager.getFirstVersion();
+    public void replaceLineFirst(int lineno, String newValue) {
         executorService.submit(() -> {
-            if (firstVersion == versionManager.getFirstVersion())
-                diffService.uploadFirstText(text);
+            diffService.replaceLineFirst(lineno, newValue);
         });
     }
 
-    public void uploadSecondText(Collection<String> text) {
-        long secondVersion = versionManager.getSecondVersion();
+    public void replaceLineSecond(int lineno, String newValue) {
         executorService.submit(() -> {
-            if (secondVersion == versionManager.getSecondVersion())
-                diffService.uploadSecondText(text);
-        } );
+            diffService.replaceLineSecond(lineno, newValue);
+        });
+    }
+
+    public void removeLinesFirst(final int start, final int end) {
+        executorService.submit(() -> {
+            diffService.removeFirstLines(start, end - start + 1);
+        });
+    }
+
+    public void removeLinesSecond(final int start, final int end) {
+        executorService.submit(() -> {
+            diffService.removeSecondLines(start, end - start + 1);
+        });
+    }
+
+    public void insertLinesFirst(final int start, final List<String> elements) {
+        executorService.submit(() -> {
+            diffService.insertFirstLines(start, elements);
+        });
+    }
+
+    public void insertLinesSecond(final int start, final List<String> elements) {
+        executorService.submit(() -> {
+            diffService.insertSecondLines(start, elements);
+        });
+    }
+
+    public Future<String> getFirstText() {
+        return executorService.submit(() -> diffService.getFirstText());
+    }
+
+    public Future<String> getSecondText() {
+        return executorService.submit(() -> diffService.getSecondText());
     }
 
     public void requestDiff() {
@@ -70,4 +101,5 @@ public class DiffController {
         for (DiffConsumer diffConsumer : diffConsumerList)
             diffConsumer.updateDiffResult(null);
     }
+
 }

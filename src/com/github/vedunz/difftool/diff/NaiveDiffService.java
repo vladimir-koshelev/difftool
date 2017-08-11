@@ -10,33 +10,18 @@ import java.util.List;
 /**
  * Created by vedun on 22.07.2017.
  */
-public class NaiveDiffService implements DiffService {
-
-    private final ArrayList<String> firstLines = new ArrayList<>();
-    private final ArrayList<String> secondLines = new ArrayList<>();
-
-    @Override
-    public void uploadFirstText(@NotNull Collection<String> text) {
-        firstLines.clear();
-        firstLines.addAll(text);
-    }
-
-    @Override
-    public void uploadSecondText(@NotNull Collection<String> text) {
-        secondLines.clear();
-        secondLines.addAll(text);
-    }
+public class NaiveDiffService extends AbstractDiffService {
 
     @Override
     public DiffResult getDiffResult() {
-        int n = firstLines.size();
-        int m = secondLines.size();
+        int n = firstText.size();
+        int m = secondText.size();
         int[][] lcs = new int[n + 1][m + 1];
         LCSParent[][] lcsParent = new LCSParent[n + 1][m + 1];
 
         for (int i = 1; i <= n; ++i) {
             for (int j = 1; j <= m; ++j) {
-                if (firstLines.get(i - 1).equals(secondLines.get(j - 1))) {
+                if (firstText.get(i - 1).equals(secondText.get(j - 1))) {
                     lcsParent[i][j] = LCSParent.BOTH;
                     lcs[i][j] = lcs[i - 1][j - 1] + 1;
                 } else {

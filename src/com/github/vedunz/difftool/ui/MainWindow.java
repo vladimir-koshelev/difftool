@@ -6,6 +6,7 @@ import com.github.vedunz.difftool.control.LineDiffController;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.*;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
@@ -30,38 +31,9 @@ public final class MainWindow extends JFrame {
 
     private final DiffController controller = new DiffController(versionManager);
 
-    private final DocumentListener documentListener = new DocumentListener() {
-
-        @Override
-        public void insertUpdate(DocumentEvent e) {
-            processUpdate(e);
-        }
-
-        @Override
-        public void removeUpdate(DocumentEvent e) {
-            processUpdate(e);
-        }
-
-        @Override
-        public void changedUpdate(DocumentEvent e) {
-
-        }
-
-        private void processUpdate(DocumentEvent e) {
-            controller.invalidate();
-            if (e.getDocument() == firstDiffPanel.getEditor().getDocument()) {
-                versionManager.firstTextUpdated();
-                List<String> lines = Arrays.asList(firstDiffPanel.getEditor().getText().split("\\r?\\n"));
-                controller.uploadFirstText(lines);
-            } else {
-                versionManager.secondTextUpdated();
-                List<String> lines = Arrays.asList(secondDiffPanel.getEditor().getText().split("\\r?\\n"));
-                controller.uploadSecondText(lines);
-            }
-            controller.requestDiff();
-        }
-    };
-
+    private final DocumentManager documentManager =
+            new DocumentManager((AbstractDocument) firstDiffPanel.getEditor().getDocument(),
+                    (AbstractDocument) secondDiffPanel.getEditor().getDocument(), controller, versionManager);
 
     public MainWindow() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -77,9 +49,6 @@ public final class MainWindow extends JFrame {
         controller.addDiffConsumer(scrollManager);
         controller.addDiffConsumer(firstDiffNavigationManager);
         controller.addDiffConsumer(secondDiffNavigationManager);
-
-        firstDiffPanel.getEditor().getStyledDocument().addDocumentListener(documentListener);
-        secondDiffPanel.getEditor().getStyledDocument().addDocumentListener(documentListener);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
