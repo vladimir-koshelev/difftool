@@ -19,7 +19,7 @@ import java.nio.file.Files;
 import java.util.List;
 
 public class DiffPanel extends JPanel {
-    private final JTextPane editor = new JTextPane(new DefaultStyledDocument());
+    private final JTextPane editor = new JTextPaneLineHighlight(new DefaultStyledDocument());
     private final JPanel editorPanel = new JPanel(new BorderLayout());
     private final JScrollPane scrollPane = new JScrollPane(editorPanel);
     private final JButton openButton = new JButton();
