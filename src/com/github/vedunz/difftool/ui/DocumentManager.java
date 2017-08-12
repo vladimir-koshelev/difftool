@@ -5,7 +5,9 @@ import com.github.vedunz.difftool.control.DiffController;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,10 +36,39 @@ public class DocumentManager {
         @Override
         public void replace(final FilterBypass fb, final int offset, final int length,
                             final String text, final AttributeSet attrs) throws BadLocationException {
+            AttributeSet newAttrs = keepAttributeSet(fb, offset, attrs);
             processRemove(fb.getDocument(), offset, length);
-            super.replace(fb, offset, length, text, attrs);
+            super.replace(fb, offset, length, text, newAttrs);
         }
 
+        @Override
+        public void insertString(final FilterBypass fb, final int offset, final String string, final AttributeSet attr)
+                throws BadLocationException {
+            AttributeSet newAttrs = keepAttributeSet(fb, offset, attr);
+            super.insertString(fb, offset, string, newAttrs);
+        }
+
+        private AttributeSet keepAttributeSet(final FilterBypass fb, final int offset, final AttributeSet attrs) {
+            Element root = fb.getDocument().getDefaultRootElement();
+            if (offset > 0) {
+                Element prev = root.getElement(root.getElementIndex(offset - 1));
+                while (prev.getElementCount() != 0) {
+                    prev = prev.getElement(prev.getElementCount() - 1);
+                }
+                Color background = StyleConstants.getBackground(prev.getAttributes());
+                if (background != null && !background.equals(Color.BLACK)) {
+                    if (attrs == null) {
+                        SimpleAttributeSet simpleAttributeSet = new SimpleAttributeSet();
+                        StyleConstants.setBackground(simpleAttributeSet, background);
+                        return simpleAttributeSet;
+                    }
+
+                    MutableAttributeSet mattrs = (MutableAttributeSet) attrs;
+                    StyleConstants.setBackground(mattrs, background);
+                }
+            }
+            return attrs;
+        }
 
         private void processRemove(final Document document, final int offset, final int length) throws BadLocationException {
             Element root = document.getDefaultRootElement();
