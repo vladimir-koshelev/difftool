@@ -16,8 +16,8 @@ import java.util.List;
  */
 public final class MainWindow extends JFrame {
 
-    private final DiffPanel firstDiffPanel = new DiffPanel();
-    private final DiffPanel secondDiffPanel = new DiffPanel();
+    private final DiffPanel firstDiffPanel = new DiffPanel(true);
+    private final DiffPanel secondDiffPanel = new DiffPanel(false);
 
     private final VersionManager versionManager = new VersionManager();
 

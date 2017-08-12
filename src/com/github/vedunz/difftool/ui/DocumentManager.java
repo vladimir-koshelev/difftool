@@ -13,7 +13,7 @@ import java.util.concurrent.Future;
 
 public class DocumentManager {
 
-    private final boolean CONSISTENCY_CHECK = true;
+    private final boolean CONSISTENCY_CHECK = false;
 
     private final ExecutorService executorConsService = (CONSISTENCY_CHECK) ? Executors.newSingleThreadExecutor(): null;
 

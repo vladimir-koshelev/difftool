@@ -1,6 +1,7 @@
 package com.github.vedunz.difftool.ui;
 
 import com.github.vedunz.difftool.diff.Interval;
+import com.github.vedunz.difftool.ui.util.StyleManager;
 import com.github.vedunz.difftool.ui.util.UIUtils;
 
 import javax.swing.*;
@@ -9,11 +10,15 @@ import java.awt.*;
 
 public class JTextPaneLineHighlight extends JTextPane {
 
-    public JTextPaneLineHighlight() {
+    private final Color backgroundColor;
+
+    public JTextPaneLineHighlight(final  Color backgroundColor) {
+        this.backgroundColor = backgroundColor;
     }
 
-    public JTextPaneLineHighlight(final StyledDocument doc) {
+    public JTextPaneLineHighlight(final StyledDocument doc, final Color backgroundColor) {
         super(doc);
+        this.backgroundColor = backgroundColor;
     }
 
     @Override
@@ -42,13 +47,19 @@ public class JTextPaneLineHighlight extends JTextPane {
                     if (color != null)
                         break;
                 }
+
+                Style style = StyleManager.getStyleContext().getStyle(StyleManager.MAIN_STYLE_NAME);
+
+                if (StyleManager.getStyleContext().getBackground(style).equals(color))
+                    continue;
+
                 if (color != null) {
                     int end = element.getEndOffset() - 1;
                     Rectangle r = modelToView(end);
                     r.x += r.width;
                     r.width = viewport.getWidth() - r.x + viewport.getViewRect().x;
                     Color oldColor = g.getColor();
-                    g.setColor(color);
+                    g.setColor(backgroundColor);
                     g.fillRect(r.x, r.y, r.width, r.height);
                     g.setColor(oldColor);
                 }

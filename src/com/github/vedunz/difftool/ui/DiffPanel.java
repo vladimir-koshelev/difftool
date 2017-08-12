@@ -19,7 +19,7 @@ import java.nio.file.Files;
 import java.util.List;
 
 public class DiffPanel extends JPanel {
-    private final JTextPane editor = new JTextPaneLineHighlight(new DefaultStyledDocument());
+    private final JTextPane editor;
     private final JPanel editorPanel = new JPanel(new BorderLayout());
     private final JScrollPane scrollPane = new JScrollPane(editorPanel);
     private final JButton openButton = new JButton();
@@ -31,7 +31,11 @@ public class DiffPanel extends JPanel {
     private boolean isOpenFileOperation = false;
 
 
-    public DiffPanel() {
+    public DiffPanel(boolean isFirst) {
+        Style style = StyleManager.getStyleContext().getStyle(isFirst ?
+                StyleManager.REMOVED_STYLE_NAME : StyleManager.ADDED_STYLE_NAME);
+        editor = new JTextPaneLineHighlight(new DefaultStyledDocument(),
+                StyleManager.getStyleContext().getBackground(style));
         fileName.setEditable(false);
         final StyleContext styleContext = StyleManager.getStyleContext();
         editor.setFont(styleContext.getFont(styleContext.getStyle(StyleManager.MAIN_STYLE_NAME)));

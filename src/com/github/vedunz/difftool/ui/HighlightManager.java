@@ -21,6 +21,8 @@ import java.util.List;
  */
 public class HighlightManager implements DiffConsumer, LineDiffConsumer {
 
+    private final static boolean ENABLE_COLORS_IN_LINE_PANEL = false;
+
     private static final int CHUNK_SIZE = 128;
     private final JTextPane firstEditor;
     private final JTextPane secondEditor;
@@ -62,8 +64,10 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
         };
         firstScrollPane.getViewport().addChangeListener(changeListener);
         secondScrollPane.getViewport().addChangeListener(changeListener);
-        firstDiffPanel.getLinePanel().setColorProvider(getFirstBackgroundColorProvider());
-        secondDiffPanel.getLinePanel().setColorProvider(getSecondBackgroundColorProvider());
+        if (ENABLE_COLORS_IN_LINE_PANEL) {
+            firstDiffPanel.getLinePanel().setColorProvider(getFirstBackgroundColorProvider());
+            secondDiffPanel.getLinePanel().setColorProvider(getSecondBackgroundColorProvider());
+        }
     }
 
     @Override
