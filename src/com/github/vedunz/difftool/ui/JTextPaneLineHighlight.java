@@ -12,6 +12,7 @@ public class JTextPaneLineHighlight extends JTextPane {
 
     private final Color backgroundColor;
 
+
     public JTextPaneLineHighlight(final  Color backgroundColor) {
         this.backgroundColor = backgroundColor;
     }
@@ -68,5 +69,7 @@ public class JTextPaneLineHighlight extends JTextPane {
         } catch (BadLocationException e) {
             e.printStackTrace();
         }
+    //    if (repaintGroup != null)
+    //        repaintGroup.repaintImmediately(this);
     }
 }

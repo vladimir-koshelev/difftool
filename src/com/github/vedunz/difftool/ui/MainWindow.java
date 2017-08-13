@@ -2,6 +2,8 @@ package com.github.vedunz.difftool.ui;
 
 import com.github.vedunz.difftool.control.DiffController;
 import com.github.vedunz.difftool.control.LineDiffController;
+import com.github.vedunz.difftool.diff.GNUDiffService;
+import com.github.vedunz.difftool.diff.MyersDiffService;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -29,6 +31,8 @@ public final class MainWindow extends JFrame {
     private final DiffNavigationManager firstDiffNavigationManager = new DiffNavigationManager(firstDiffPanel, true);
     private final DiffNavigationManager secondDiffNavigationManager = new DiffNavigationManager(secondDiffPanel, false);
 
+    private final JMenuBar menuBar = new JMenuBar();
+
     private final DiffController controller = new DiffController(versionManager);
 
     private final DocumentManager documentManager =
@@ -38,6 +42,8 @@ public final class MainWindow extends JFrame {
     public MainWindow() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setSize(screenSize.width * 3 / 4, screenSize.height * 3 / 4);
+
+        createMenu();
 
         setLayout(new BoxLayout(getContentPane(), BoxLayout.LINE_AXIS));
         add(firstDiffPanel);
@@ -51,6 +57,25 @@ public final class MainWindow extends JFrame {
         controller.addDiffConsumer(secondDiffNavigationManager);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
         setVisible(true);
+    }
+
+    private void createMenu() {
+        JMenu diffAlgorithm = new JMenu("Diff algorithm");
+        JRadioButtonMenuItem apacheMyers = new JRadioButtonMenuItem("Apache Myers");
+        apacheMyers.addActionListener((e) -> controller.changeDiffService(new MyersDiffService()));
+        JRadioButtonMenuItem gnuDiff = new JRadioButtonMenuItem( "GNU Diff");
+        gnuDiff.addActionListener((e) -> controller.changeDiffService(new GNUDiffService()));
+
+        ButtonGroup buttonGroup = new ButtonGroup();
+        buttonGroup.add(apacheMyers);
+        buttonGroup.add(gnuDiff);
+        buttonGroup.setSelected(apacheMyers.getModel(), true);
+
+        diffAlgorithm.add(apacheMyers);
+        diffAlgorithm.add(gnuDiff);
+        menuBar.add(diffAlgorithm);
+        setJMenuBar(menuBar);
     }
 }

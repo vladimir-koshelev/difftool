@@ -26,7 +26,6 @@ public class LinePanel extends JPanel {
     private int currentWidth = 0;
     private int numOfSymbols = 0;
 
-
     public LinePanel(JTextPane textPane, JViewport viewport) {
         this.textPane = textPane;
         this.viewport = viewport;
@@ -36,7 +35,10 @@ public class LinePanel extends JPanel {
         fontMetrics = getFontMetrics(font);
         adjustWidth();
 
-        viewport.addChangeListener( e -> paintImmediately(getVisibleRect()) );
+        viewport.addChangeListener((e) -> {
+            this.invalidate();
+            this.repaint();
+        });
 
         textPane.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -75,6 +77,7 @@ public class LinePanel extends JPanel {
     @Override
     protected void paintComponent(final Graphics g) {
         super.paintComponent(g);
+
         try {
             Interval interval = UIUtils.getVisibleLines(viewport, textPane);
             int starty = textPane.modelToView(UIUtils.lineToOffset(interval.getStart(), textPane)).y;
@@ -123,6 +126,8 @@ public class LinePanel extends JPanel {
             e.printStackTrace();
         }
 
+      //  if (repaintGroup != null)
+        //    repaintGroup.repaintImmediately(this);
     }
 
     private int getNumberOfDigitsForLineNo() {

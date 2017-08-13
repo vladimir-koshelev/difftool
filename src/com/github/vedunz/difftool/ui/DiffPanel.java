@@ -19,7 +19,7 @@ import java.nio.file.Files;
 import java.util.List;
 
 public class DiffPanel extends JPanel {
-    private final JTextPane editor;
+    private final JTextPaneLineHighlight editor;
     private final JPanel editorPanel = new JPanel(new BorderLayout());
     private final JScrollPane scrollPane = new JScrollPane(editorPanel);
     private final JButton openButton = new JButton();
@@ -49,7 +49,7 @@ public class DiffPanel extends JPanel {
         scrollPane.getVerticalScrollBar().setUnitIncrement(32);
     }
 
-    public JTextPane getEditor() {
+    public JTextPaneLineHighlight getEditor() {
         return editor;
     }
 

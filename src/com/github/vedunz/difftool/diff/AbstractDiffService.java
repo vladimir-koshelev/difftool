@@ -47,6 +47,16 @@ public abstract class AbstractDiffService implements DiffService {
     }
 
     @Override
+    public List<String> getFirstTextLines() {
+        return firstText;
+    }
+
+    @Override
+    public List<String> getSecondTextLines() {
+        return secondText;
+    }
+
+    @Override
     public String getFirstText() {
         return list2String(firstText);
     }

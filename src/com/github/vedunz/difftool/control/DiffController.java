@@ -10,10 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 /**
  * Created by vedun on 22.07.2017.
@@ -21,7 +18,7 @@ import java.util.concurrent.Future;
 public class DiffController {
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-    private final DiffService diffService = DiffService.createDefaultDiffService();
+    private DiffService diffService = DiffService.createDefaultDiffService();
     private final VersionManager versionManager;
     private final List<DiffConsumer> diffConsumerList = new ArrayList<>();
 
@@ -35,6 +32,18 @@ public class DiffController {
 
     public void removeDiffConsumer(DiffConsumer diffConsumer) {
         diffConsumerList.remove(diffConsumer);
+    }
+
+    public void changeDiffService(DiffService diffService) {
+        Future<List<String>> firstLines = executorService.submit(this.diffService::getFirstTextLines);
+        Future<List<String>> secondLines = executorService.submit(this.diffService::getSecondTextLines);
+        try {
+            diffService.insertFirstLines(0, firstLines.get());
+            diffService.insertSecondLines(0, secondLines.get());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        this.diffService = diffService;
     }
 
     public void replaceLineFirst(int lineno, String newValue) {

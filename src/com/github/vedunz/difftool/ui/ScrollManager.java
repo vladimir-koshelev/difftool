@@ -86,8 +86,10 @@ public class ScrollManager implements DiffConsumer {
                 anotherViewport.setViewPosition(new Point(
                         anotherViewport.getViewPosition().x, newSecondPos
                 ));
-                editor.paintImmediately(viewport.getViewRect());
-                anotherEditor.paintImmediately(anotherViewport.getViewRect());
+                editor.invalidate();
+                editor.repaint(editor.getVisibleRect());
+                anotherEditor.invalidate();
+                anotherEditor.repaint(anotherEditor.getVisibleRect());
             }
         }
     }
