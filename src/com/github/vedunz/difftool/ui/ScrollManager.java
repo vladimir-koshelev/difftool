@@ -49,7 +49,7 @@ public class ScrollManager implements DiffConsumer {
                 ignoreUpdate = false;
             }
         };
-        firstScrollPane.getViewport().addChangeListener(changeListener);
+        firstViewport.addChangeListener(changeListener);
         secondViewport.addChangeListener(changeListener);
     }
 
@@ -82,10 +82,13 @@ public class ScrollManager implements DiffConsumer {
         int newSecondPos = secondYPos - (firstYPos - yOffset);
         if (newSecondPos != anotherViewport.getViewPosition().y) {
             if (newSecondPos + anotherViewport.getViewRect().height < anotherEditor.getHeight() &&
-                    newSecondPos >= 0)
+                    newSecondPos >= 0) {
                 anotherViewport.setViewPosition(new Point(
                         anotherViewport.getViewPosition().x, newSecondPos
                 ));
+                editor.paintImmediately(viewport.getViewRect());
+                anotherEditor.paintImmediately(anotherViewport.getViewRect());
+            }
         }
     }
 
