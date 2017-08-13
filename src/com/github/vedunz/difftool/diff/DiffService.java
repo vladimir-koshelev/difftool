@@ -9,7 +9,7 @@ import java.util.List;
  */
 public interface DiffService {
     static DiffService createDefaultDiffService() {
-        return new MyersDiffService();
+        return new GNUDiffService();
     }
 
     void insertFirstLines(int offset, @NotNull List<String> lines);

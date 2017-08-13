@@ -14,6 +14,12 @@ public abstract class DiffInterval {
         this.beginSecond = beginSecond;
     }
 
+    protected DiffInterval(int beginFirst, int beginSecond, int length) {
+        this.beginFirst = beginFirst;
+        this.beginSecond = beginSecond;
+        this.length = length;
+    }
+
     public int getLength() {
         return length;
     }

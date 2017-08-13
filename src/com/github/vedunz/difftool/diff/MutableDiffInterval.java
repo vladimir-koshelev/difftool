@@ -4,6 +4,10 @@ package com.github.vedunz.difftool.diff;
  * Created by vedun on 22.07.2017.
  */
 class MutableDiffInterval extends DiffInterval {
+    public MutableDiffInterval(int startFirst, int startSecond, int length) {
+        super(startFirst, startSecond, length);
+    }
+
     public MutableDiffInterval(int endFirst, int endSecond) {
         super(endFirst, endSecond);
     }

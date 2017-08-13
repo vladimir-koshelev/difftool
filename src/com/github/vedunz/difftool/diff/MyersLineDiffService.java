@@ -21,6 +21,6 @@ public class MyersLineDiffService implements LineDiffService {
         for (char c : secondLine.toCharArray()) {
             secondChars.add(c);
         }
-        return MyersDiffServiceCommon.getDiffResult(firstChars, secondChars);
+        return MyersDiffCommon.getDiffResult(firstChars, secondChars);
     }
 }

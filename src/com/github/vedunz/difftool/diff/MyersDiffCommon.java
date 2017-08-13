@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by vedun on 26.07.2017.
  */
-public class MyersDiffServiceCommon {
+public class MyersDiffCommon {
     public static <T> DiffResult getDiffResult(List<T> firstList, List<T> secondList) {
         DiffComparator<T> diffComparator = new DiffComparator<>(firstList, secondList);
         EditScript<T> script = diffComparator.getScript();

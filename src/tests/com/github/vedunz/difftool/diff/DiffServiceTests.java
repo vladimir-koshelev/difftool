@@ -65,4 +65,25 @@ class DiffServiceTests {
         }
         assertTrue(totalLength == 6);
     }
+
+    @Test
+    void gnuDiffTest() {
+        ArrayList<String> firstText = new ArrayList<>();
+        firstText.addAll(PATTERN1);
+        firstText.addAll(PATTERN2);
+        firstText.addAll(PATTERN1);
+        ArrayList<String> secondText = new ArrayList<>();
+        secondText.addAll(PATTERN2);
+        secondText.addAll(PATTERN1);
+        secondText.addAll(PATTERN2);
+        DiffService diffService = new GNUDiffService();
+        diffService.insertFirstLines(0, firstText);
+        diffService.insertSecondLines(0, secondText);
+        DiffResult result = diffService.getDiffResult();
+        int totalLength = 0;
+        for (DiffInterval interval : result.getIntervals()) {
+            totalLength += interval.getLength();
+        }
+        assertTrue(totalLength == 6);
+    }
 }

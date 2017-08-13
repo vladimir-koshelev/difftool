@@ -99,7 +99,7 @@ public class HighlightManager implements DiffConsumer, LineDiffConsumer {
     private String getLineText(JTextPane editor, int line) throws BadLocationException {
         Element rootElement = editor.getDocument().getDefaultRootElement();
         Element element = rootElement.getElement(line);
-        return editor.getDocument().getText(element.getStartOffset(), element.getEndOffset() - element.getStartOffset() - 1);
+        return editor.getDocument().getText(element.getStartOffset(), element.getEndOffset() - element.getStartOffset());
     }
 
     private void requestLinesInVisibleAreaFirst() throws BadLocationException {
