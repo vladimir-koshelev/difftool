@@ -16,6 +16,7 @@ import java.awt.*;
  */
 public class ScrollManager implements DiffConsumer {
 
+    private static final long REPAINT_DELAY = 25;
     private final JTextPane firstEditor;
     private final JTextPane secondEditor;
 
@@ -25,6 +26,8 @@ public class ScrollManager implements DiffConsumer {
     private DiffResult diffResult;
 
     private boolean ignoreUpdate = false;
+
+    private long lastRepaintTime;
 
     public ScrollManager(DiffPanel firstDiffPanel, DiffPanel secondDiffPanel) {
         this.firstEditor = firstDiffPanel.getEditor();
@@ -86,10 +89,12 @@ public class ScrollManager implements DiffConsumer {
                 anotherViewport.setViewPosition(new Point(
                         anotherViewport.getViewPosition().x, newSecondPos
                 ));
-                editor.invalidate();
-                editor.repaint(editor.getVisibleRect());
-                anotherEditor.invalidate();
-                anotherEditor.repaint(anotherEditor.getVisibleRect());
+
+                if (System.currentTimeMillis() - lastRepaintTime > REPAINT_DELAY) {
+                    editor.paintImmediately(editor.getVisibleRect());
+                    anotherEditor.paintImmediately(anotherEditor.getVisibleRect());
+                    lastRepaintTime = System.currentTimeMillis();
+                }
             }
         }
     }
