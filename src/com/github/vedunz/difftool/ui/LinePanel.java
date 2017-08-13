@@ -36,7 +36,7 @@ public class LinePanel extends JPanel {
         fontMetrics = getFontMetrics(font);
         adjustWidth();
 
-        viewport.addChangeListener( e -> { revalidate(); repaint();});
+        viewport.addChangeListener( e -> paintImmediately(getVisibleRect()) );
 
         textPane.getDocument().addDocumentListener(new DocumentListener() {
             @Override
