@@ -16,7 +16,7 @@ import java.awt.*;
  */
 public class ScrollManager implements DiffConsumer {
 
-    private static final long REPAINT_DELAY = 25;
+    private static final long REPAINT_DELAY = 10;
     private final JTextPane firstEditor;
     private final JTextPane secondEditor;
 
